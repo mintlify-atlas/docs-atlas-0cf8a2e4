@@ -1,0 +1,186 @@
+---
+title: "Environment variables"
+description: "Complete reference for all environment variables that control Discord Tickets bot behavior."
+---
+
+Discord Tickets is configured entirely through environment variables. Set these in a `.env` file in the project root, or pass them directly to your process manager or container runtime.
+
+<Warning>
+The bot will exit immediately at startup if any required environment variable is missing or invalid. Check the console output for the specific error.
+</Warning>
+
+## Required variables
+
+These must be set for the bot to start.
+
+<ParamField path="DB_PROVIDER" type="string" required>
+  The database provider to use. Must be one of `mysql`, `postgresql`, or `sqlite`.
+
+  ```bash
+  DB_PROVIDER=mysql
+  ```
+</ParamField>
+
+<ParamField path="DB_CONNECTION_URL" type="string">
+  The database connection URL. Required when `DB_PROVIDER` is `mysql` or `postgresql`. Not needed for `sqlite`.
+
+  ```bash
+  # MySQL
+  DB_CONNECTION_URL=mysql://user:password@host/database
+
+  # PostgreSQL
+  DB_CONNECTION_URL=postgresql://user:password@host/database
+  ```
+
+  See the [database configuration](/configuration/database) page for full connection URL formats.
+</ParamField>
+
+<ParamField path="DISCORD_TOKEN" type="string" required>
+  Your Discord bot token. Obtain this from the [Discord Developer Portal](https://discord.com/developers/applications) under your application's **Bot** tab.
+
+  ```bash
+  DISCORD_TOKEN=your_bot_token_here
+  ```
+</ParamField>
+
+<ParamField path="DISCORD_SECRET" type="string" required>
+  Your Discord application's OAuth2 client secret. Found in the **OAuth2** section of the Discord Developer Portal.
+
+  ```bash
+  DISCORD_SECRET=your_client_secret_here
+  ```
+</ParamField>
+
+<ParamField path="ENCRYPTION_KEY" type="string" required>
+  A secret key used to encrypt sensitive data in the database and to sign JWT session tokens. Must be at least 48 characters long.
+
+  Generate a key with:
+
+  ```bash
+  npm run keygen
+  ```
+
+  ```bash
+  ENCRYPTION_KEY=your_48_char_minimum_key_here
+  ```
+
+  <Warning>
+  If you lose this key, most data in the database will become unreadable and you will need a full reset.
+  </Warning>
+
+  See the [security configuration](/configuration/security) page for more details.
+</ParamField>
+
+<ParamField path="HTTP_EXTERNAL" type="string" required>
+  The public-facing URL of the web dashboard. Must start with `http` or `https`. Do not include a trailing slash.
+
+  This URL is used as the OAuth2 redirect URI and in links sent to users.
+
+  ```bash
+  HTTP_EXTERNAL=https://tickets.example.com
+  ```
+</ParamField>
+
+<ParamField path="HTTP_HOST" type="string" required>
+  The network address the HTTP server binds to. Use `0.0.0.0` to listen on all interfaces. Must be an address, not a URL.
+
+  ```bash
+  HTTP_HOST=0.0.0.0
+  ```
+</ParamField>
+
+<ParamField path="HTTP_PORT" type="number" required>
+  The port the HTTP server listens on. Defaults to `8169` in the Docker Compose example.
+
+  ```bash
+  HTTP_PORT=8169
+  ```
+</ParamField>
+
+## Optional variables
+
+<ParamField path="HTTP_INTERNAL" type="string">
+  An internal URL override for the HTTP server. When set, this value is used as the server's origin instead of `HTTP_EXTERNAL`. Useful when your internal network uses a different address than the public URL.
+
+  ```bash
+  HTTP_INTERNAL=http://bot:8169
+  ```
+</ParamField>
+
+<ParamField path="HTTP_TRUST_PROXY" type="boolean">
+  Set to `true` if the bot is running behind a reverse proxy (such as nginx or Caddy). This tells the HTTP server to trust the `X-Forwarded-For` header for client IP detection.
+
+  ```bash
+  HTTP_TRUST_PROXY=true
+  ```
+</ParamField>
+
+<ParamField path="INVALIDATE_TOKENS" type="string">
+  A date string. Any JWT session tokens created before this date are rejected as expired, forcing all users to re-authenticate. Useful after a security incident or key rotation.
+
+  ```bash
+  INVALIDATE_TOKENS=2024-01-01T00:00:00.000Z
+  ```
+</ParamField>
+
+<ParamField path="OVERRIDE_ARCHIVE" type="string">
+  Overrides the archive setting for all guilds, ignoring per-guild configuration. Set to `null` to disable the override.
+
+  ```bash
+  OVERRIDE_ARCHIVE=true
+  ```
+</ParamField>
+
+<ParamField path="PUBLIC_BOT" type="boolean">
+  Set to `true` to enable public bot mode, allowing the bot to be used in any server without restrictions.
+
+  ```bash
+  PUBLIC_BOT=false
+  ```
+</ParamField>
+
+<ParamField path="PUBLISH_COMMANDS" type="boolean">
+  Set to `true` to publish slash commands globally across all guilds. When `false`, commands are registered per-guild.
+
+  ```bash
+  PUBLISH_COMMANDS=false
+  ```
+</ParamField>
+
+<ParamField path="SUPER" type="string">
+  A comma-separated list of Discord user IDs that have superuser (OPERATOR) access. Superusers can change bot settings for any guild the bot is in, regardless of their Discord permissions in that guild.
+
+  ```bash
+  SUPER=123456789012345678,987654321098765432
+  ```
+
+  <Warning>
+  Superusers bypass all guild permission checks. Only grant this to users you fully trust. See the [security configuration](/configuration/security) page for the full privilege level system.
+  </Warning>
+</ParamField>
+
+## Example .env file
+
+```bash .env
+# Database
+DB_PROVIDER=mysql
+DB_CONNECTION_URL=mysql://tickets:password@localhost/tickets
+
+# Discord
+DISCORD_TOKEN=your_bot_token
+DISCORD_SECRET=your_client_secret
+
+# Encryption
+ENCRYPTION_KEY=your_48_character_minimum_encryption_key_here
+
+# HTTP
+HTTP_EXTERNAL=https://tickets.example.com
+HTTP_HOST=0.0.0.0
+HTTP_PORT=8169
+HTTP_TRUST_PROXY=true
+
+# Optional
+PUBLISH_COMMANDS=false
+PUBLIC_BOT=false
+SUPER=123456789012345678
+```

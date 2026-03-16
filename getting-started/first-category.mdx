@@ -1,0 +1,77 @@
+---
+title: "Create your first ticket category"
+description: "Set up a ticket category in the dashboard so members can open their first ticket."
+---
+
+After the bot is running and has joined your server, you need to create at least one ticket category. A category defines where tickets are created, who can access them, and what information is collected from the member before a ticket is opened.
+
+## Prerequisites
+
+- The bot is running and online in your server
+- You are listed in the `SUPER` environment variable, or you have the **Administrator** permission in the server
+- You have completed the [invite](/getting-started/invite) step
+
+## Open the dashboard
+
+Navigate to the URL you set as `HTTP_EXTERNAL` in your browser. For example:
+
+```
+https://tickets.example.com
+```
+
+Sign in with Discord using the **Login** button. After authorising, you will be redirected to the dashboard.
+
+## Steps
+
+<Steps>
+  <Step title="Select your server">
+    On the dashboard home page, select your server from the list of guilds you manage.
+  </Step>
+
+  <Step title="Go to Categories">
+    In the server settings sidebar, click **Categories**, then click **New category**.
+  </Step>
+
+  <Step title="Configure the category">
+    Fill in the category settings:
+
+    - **Name** — a short label used in the panel button and ticket channel names (for example, `Support`)
+    - **Channel** — the Discord channel where the panel (button) will appear
+    - **Claiming** — whether staff can claim exclusive ownership of tickets
+    - **Topic** — optional; if enabled, the member must choose a topic before the ticket is created
+    - **Questions** — optional; up to 5 custom questions shown in a modal before the ticket is created
+
+    You can also configure:
+
+    - **Opening message** — the first message posted inside every new ticket
+    - **Ping roles** — roles to notify when a new ticket is opened
+    - **Cooldown** — how long a member must wait between opening tickets in this category
+    - **Maximum open tickets** — limit on how many tickets one member can have open at a time
+  </Step>
+
+  <Step title="Save and send the panel">
+    Click **Save**. Then click **Send panel** to post the ticket creation button in the channel you selected.
+
+    Members can now click the button to open a ticket in this category.
+  </Step>
+</Steps>
+
+## Testing the category
+
+Once the panel is posted, open a ticket yourself to verify everything is working:
+
+1. Click the button in the panel channel.
+2. Complete any topic selection or questions you configured.
+3. Confirm a private ticket channel is created and the opening message appears.
+4. Close the ticket using the `/close` command or the close button.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Features overview" icon="list" href="/features">
+    Learn about tags, auto-close, statistics, and other features.
+  </Card>
+  <Card title="Configuration reference" icon="gear" href="/self-hosting/configuration">
+    Review all environment variables and config.yml options.
+  </Card>
+</CardGroup>

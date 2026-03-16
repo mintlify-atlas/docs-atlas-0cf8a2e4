@@ -1,0 +1,86 @@
+---
+title: "Ticketing system overview"
+description: "How Discord Tickets organises support conversations into private, categorised channels."
+---
+
+Discord Tickets turns every support request into a dedicated Discord text channel. Each ticket is private to the person who created it and the staff roles assigned to its category, keeping conversations focused and auditable.
+
+## How tickets work
+
+When a user opens a ticket, the bot creates a new text channel inside a Discord category. The channel name is generated from a configurable template — for example `support-eartharoid-42` — and the channel topic shows the creator's mention and, if provided, the ticket topic.
+
+The opening message is pinned automatically so context is always visible at the top of the channel. Staff are pinged via the roles configured for that category, and the user receives a confirmation embed with a link to the new channel.
+
+## Categories
+
+Tickets always belong to a category. A category controls:
+
+<CardGroup cols={2}>
+  <Card title="Channel placement" icon="folder">
+    Which Discord category the ticket channel is created in, and the channel name template.
+  </Card>
+  <Card title="Staff access" icon="shield-halved">
+    Which roles can see and respond to tickets in this category.
+  </Card>
+  <Card title="Questions" icon="circle-question">
+    Optional modal questions shown to the user before the ticket is created.
+  </Card>
+  <Card title="Limits & cooldowns" icon="gauge">
+    Per-member open ticket limits and cooldowns between ticket creations.
+  </Card>
+  <Card title="Claiming" icon="hand">
+    Whether tickets in this category can be claimed by individual staff members.
+  </Card>
+  <Card title="Feedback" icon="star">
+    Whether users are prompted for a rating when they close a ticket.
+  </Card>
+</CardGroup>
+
+If your server has only one category, users are sent directly to that category when they request a new ticket. If there are multiple categories, users see a select menu to choose the appropriate one.
+
+## Ticket lifecycle
+
+<Steps>
+  <Step title="Created">
+    A user triggers ticket creation via a button, select menu, or the `/new` command. The bot checks limits, required roles, and cooldowns, then creates the channel.
+  </Step>
+  <Step title="Open">
+    Staff and the user communicate inside the ticket channel. Staff can add or remove members, set priority, claim the ticket, and more.
+  </Step>
+  <Step title="Close requested">
+    Either the user or a staff member requests closure. If the category has feedback enabled and the user hasn't rated yet, they are prompted first.
+  </Step>
+  <Step title="Closed">
+    After acceptance, the ticket channel is deleted. The bot sends a summary DM to the ticket creator and logs the event to the configured log channel.
+  </Step>
+</Steps>
+
+## Key limits
+
+| Constraint | Description |
+|---|---|
+| Total limit | Maximum open tickets per category |
+| Member limit | Maximum open tickets per user per category |
+| Cooldown | Minimum time between ticket creations per user per category |
+| Discord category limit | A Discord category can hold at most 50 channels |
+
+<Note>
+All sensitive ticket data — topics, question answers, and close reasons — is encrypted at rest.
+</Note>
+
+## Related pages
+
+<CardGroup cols={2}>
+  <Card title="Creating tickets" href="/features/tickets/creating">
+    Buttons, select menus, and the /new command.
+  </Card>
+  <Card title="Managing tickets" href="/features/tickets/managing">
+    Members, priority, topic, and renaming.
+  </Card>
+  <Card title="Closing tickets" href="/features/tickets/closing">
+    The confirmation flow and force-close.
+  </Card>
+  <Card title="Transcripts" href="/features/tickets/transcripts">
+    HTML archives and the /transcript command.
+  </Card>
+</CardGroup>

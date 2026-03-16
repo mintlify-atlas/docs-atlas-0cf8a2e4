@@ -1,0 +1,54 @@
+---
+title: "Installation overview"
+description: "Choose between Docker and manual Node.js installation for self-hosting Discord Tickets."
+---
+
+Self-hosting Discord Tickets means running the bot on your own server or machine. You are responsible for keeping it running, updating it, and securing your environment.
+
+<Note>
+  Before you install the bot, you need a Discord application with a bot token. See [Create a bot](/getting-started/create-bot) if you haven't done that yet.
+</Note>
+
+## Choose an installation method
+
+<CardGroup cols={2}>
+  <Card title="Docker" icon="docker" href="/self-hosting/installation/docker">
+    **Recommended.** Run the bot in a container alongside a MySQL database. Docker handles dependencies and isolation automatically.
+  </Card>
+  <Card title="Manual (Node.js)" icon="node-js" href="/self-hosting/installation/manual">
+    Install and run the bot directly with Node.js. Suitable if you already manage a server and prefer not to use containers.
+  </Card>
+</CardGroup>
+
+## Requirements
+
+### Docker
+
+- Docker Engine and Docker Compose (v2)
+- A server with at least 512 MB of available RAM
+- Ports 8169 (or your chosen `HTTP_PORT`) accessible from the internet if you want the dashboard to be reachable
+
+### Manual
+
+- Node.js 18 or later (LTS recommended)
+- One of the supported databases: MySQL, PostgreSQL, or SQLite
+- npm (comes with Node.js)
+
+## Database options
+
+| Database | `DB_PROVIDER` value | Notes |
+|---|---|---|
+| MySQL | `mysql` | Recommended for production. Used in the official Docker Compose file. |
+| PostgreSQL | `postgresql` | Supported for production. |
+| SQLite | `sqlite` | No separate database server needed. Suitable for small servers or testing. The file is stored at `./user/database.db`. |
+
+## What the installer does
+
+When you run `npm install` (or when the Docker container starts), two scripts run automatically:
+
+1. **`preinstall`** — Generates a `.env` file with a random `ENCRYPTION_KEY` if one does not already exist.
+2. **`postinstall`** — Copies the correct Prisma schema for your database provider, generates the Prisma client, and runs any pending database migrations.
+
+<Warning>
+  The `ENCRYPTION_KEY` is used to encrypt sensitive data in the database. If you lose it, most of the data stored by the bot will become unreadable. Back it up securely before you start.
+</Warning>

@@ -1,0 +1,72 @@
+---
+title: "Invite the bot to your server"
+description: "Generate an invite URL and add your Discord Tickets bot to a server."
+---
+
+After your bot is running, you need to invite it to your Discord server before it can manage tickets.
+
+## Generate an invite URL
+
+You can build the invite URL manually using the **Application ID** from your Discord Developer Portal application.
+
+Replace `YOUR_APPLICATION_ID` with your actual application ID:
+
+```
+https://discord.com/oauth2/authorize?client_id=YOUR_APPLICATION_ID&permissions=412317248512&scope=bot+applications.commands
+```
+
+This URL requests the following permissions:
+
+| Permission | Why it is needed |
+|---|---|
+| Manage Channels | Create and delete ticket channels |
+| Manage Roles | Assign and remove roles from ticket channels |
+| Read Messages / View Channels | Read messages in ticket channels |
+| Send Messages | Post messages and panels in channels |
+| Manage Messages | Pin the opening message in tickets |
+| Embed Links | Send rich embeds for panels and messages |
+| Attach Files | Attach transcript files |
+| Read Message History | Read older messages in ticket channels |
+| Add Reactions | React to messages when needed |
+| Use Application Commands | Register and respond to slash commands |
+
+## Steps
+
+<Steps>
+  <Step title="Open the invite URL">
+    Paste the invite URL into your browser. If you are not already logged in to Discord in that browser, you will be prompted to do so.
+  </Step>
+
+  <Step title="Select the server">
+    In the **Add to Server** dropdown, select the server you want to add the bot to. You must have the **Manage Server** permission on that server.
+  </Step>
+
+  <Step title="Confirm permissions">
+    Review the list of permissions and click **Authorise**. Complete the CAPTCHA if prompted.
+  </Step>
+
+  <Step title="Confirm the bot is online">
+    Open your server in Discord. You should see the bot appear in the member list with a green (online) status — provided the bot process is running and has successfully logged in.
+
+    <Note>
+      If the bot shows as offline, check that the process is running and that the `DISCORD_TOKEN` environment variable is set correctly.
+    </Note>
+  </Step>
+</Steps>
+
+## Slash commands
+
+Slash commands are registered to Discord automatically when the bot starts. If commands do not appear immediately, wait a few minutes — Discord can take up to an hour to propagate global command registrations.
+
+To force commands to publish on startup, set `PUBLISH_COMMANDS=true` in your environment.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Create your first category" icon="folder-plus" href="/getting-started/first-category">
+    Set up a ticket category and post a panel so members can open tickets.
+  </Card>
+  <Card title="Configuration reference" icon="gear" href="/self-hosting/configuration">
+    Review all environment variables and config.yml options.
+  </Card>
+</CardGroup>

@@ -1,0 +1,70 @@
+---
+title: "Frequently asked questions"
+description: "Answers to common questions about Discord Tickets."
+---
+
+<AccordionGroup>
+  <Accordion title="Is Discord Tickets free to use?">
+    Yes. Discord Tickets is open-source software released under a free licence. You can self-host it at no cost. There is no hosted SaaS version — you run it on your own infrastructure.
+  </Accordion>
+
+  <Accordion title="What database does Discord Tickets use?">
+    Discord Tickets uses [Prisma](https://www.prisma.io/) as an ORM and supports multiple database engines. SQLite is the default and works well for most self-hosted deployments. PostgreSQL and MySQL are also supported for larger or production deployments.
+  </Accordion>
+
+  <Accordion title="Can multiple Discord servers use the same bot instance?">
+    Yes. A single Discord Tickets instance can serve any number of guilds simultaneously. Each guild has its own isolated settings, categories, tags, and ticket data.
+  </Accordion>
+
+  <Accordion title="What is the difference between a public bot and a private bot?">
+    When `PUBLIC_BOT=true`, the bot is designed to be added to many servers by arbitrary users. In this mode:
+
+    - Service API key generation is disabled.
+    - Stale ticket auto-close is disabled.
+    - The `botPublic` configuration warning is suppressed.
+
+    Private bots (`PUBLIC_BOT=false` or unset) are intended for a controlled set of guilds managed by the bot owner.
+  </Accordion>
+
+  <Accordion title="How does ticket data encryption work?">
+    Sensitive fields — including ticket topics and close reasons — are encrypted at rest using symmetric encryption via the `ENCRYPTION_KEY` environment variable. The `DISABLE_ENCRYPTION` option (available since v4.0.41) can turn this off if you manage encryption at the database level instead.
+
+    The encryption and decryption happen in worker threads via a shared thread pool (`crypto` pool) to avoid blocking the main event loop.
+  </Accordion>
+
+  <Accordion title="Can I use the API from external services or scripts?">
+    Yes. Generate a service API key at `GET /api/users/@me/key` after logging in. Pass the returned token in the `token` cookie on subsequent requests. Service tokens do not expire with the Discord session and are suitable for server-to-server integrations.
+
+    Note that API keys are not available on public bots.
+  </Accordion>
+
+  <Accordion title="How do I back up my data?">
+    Use the export endpoint (`GET /api/admin/guilds/:guild/export`) to download a ZIP archive containing your guild's settings and all ticket data. You can import this archive to another bot instance using `POST /api/admin/guilds/:guild/import`.
+  </Accordion>
+
+  <Accordion title="What OAuth2 scopes does the bot request?">
+    The standard login flow requests `identify` and `guilds`. The admin login flow additionally requests `applications.commands.permissions.update`. When inviting the bot, the `bot` and `applications.commands` scopes are also requested with the required permissions bitfield.
+  </Accordion>
+
+  <Accordion title="How do privilege levels work?">
+    The API returns a `privilegeLevel` value for each guild:
+
+    - `0` — Regular member
+    - `1` — Staff (has a staff role in at least one ticket category)
+    - `2` — Admin (has the Manage Guild permission or is the guild owner)
+
+    Admin-level privilege is required to access the settings dashboard and all `/api/admin/` endpoints.
+  </Accordion>
+
+  <Accordion title="How many categories or tickets can I create?">
+    There is no hard limit imposed by the bot. Discord imposes a limit of 50 channels per category and 500 channels per server. In practice, the number of simultaneously open tickets is constrained by the per-user (`memberLimit`) and per-category (`totalLimit`) limits you configure.
+  </Accordion>
+
+  <Accordion title="What happens when the bot is not in a guild I request?">
+    API endpoints that reference a specific guild via the `:guild` path parameter check that the bot is a member of that guild. If it is not, the API returns `404 Not Found`.
+  </Accordion>
+
+  <Accordion title="How do I report a security vulnerability?">
+    Do not open a public GitHub issue for security vulnerabilities. See the project's security policy in the repository for responsible disclosure instructions.
+  </Accordion>
+</AccordionGroup>

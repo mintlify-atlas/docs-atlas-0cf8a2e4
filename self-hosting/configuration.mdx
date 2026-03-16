@@ -1,0 +1,131 @@
+---
+title: "Configuration"
+description: "Environment variables and runtime configuration for Discord Tickets."
+---
+
+Discord Tickets is configured entirely through environment variables (typically stored in a `.env` file or passed directly to the container). A `config.yml` file controls a small set of runtime options such as logging and presence.
+
+## Environment variables
+
+### Required variables
+
+<Warning>
+  The bot will exit immediately with an error message if any required variable is missing or invalid.
+</Warning>
+
+| Variable | Description |
+|---|---|
+| `DISCORD_TOKEN` | Your Discord bot token from the [Developer Portal](https://discord.com/developers/applications). |
+| `DISCORD_SECRET` | Your Discord application's OAuth2 client secret. |
+| `ENCRYPTION_KEY` | A random string of at least 48 characters used to encrypt sensitive data in the database. Generate one with `npm run keygen`. |
+| `DB_PROVIDER` | The database engine to use. Must be one of: `mysql`, `postgresql`, `sqlite`. |
+| `HTTP_EXTERNAL` | The public URL of the bot's web server, without a trailing slash. For example: `https://tickets.example.com`. |
+| `HTTP_HOST` | The address the web server binds to. Use `0.0.0.0` to listen on all interfaces. Must be an address, not a URL. |
+| `HTTP_PORT` | The port the web server listens on. Defaults to `8169`. |
+
+`DB_CONNECTION_URL` is required unless `DB_PROVIDER` is `sqlite`:
+
+| Variable | Description |
+|---|---|
+| `DB_CONNECTION_URL` | Connection string for MySQL or PostgreSQL. Not required for SQLite (defaults to `./user/database.db`). |
+
+### Optional variables
+
+| Variable | Description |
+|---|---|
+| `HTTP_INTERNAL` | Internal URL used when the external URL differs (for example, behind a reverse proxy). |
+| `HTTP_TRUST_PROXY` | Set to `true` if the bot is behind a reverse proxy. Passes the `trust proxy` option to the Fastify server. |
+| `SUPER` | Comma-separated list of Discord user IDs that have superuser access to all guild settings regardless of their server permissions. |
+| `PUBLIC_BOT` | Set to `true` if the bot is publicly listed. Changes some default behaviours. |
+| `PUBLISH_COMMANDS` | Set to `true` to publish slash commands globally on startup. |
+| `INVALIDATE_TOKENS` | Set to any truthy value to invalidate all stored OAuth2 tokens on next startup. |
+| `OVERRIDE_ARCHIVE` | Set to a value to override the per-guild archive setting. |
+
+## The SUPER variable
+
+The `SUPER` variable grants specific Discord users superuser access to the bot's dashboard across **all guilds** the bot is in, regardless of their permissions in those guilds.
+
+<Warning>
+  Only add your own trusted user ID(s) here. Anyone listed in `SUPER` can change settings for every server the bot is in.
+</Warning>
+
+```bash
+SUPER=123456789012345678,987654321098765432
+```
+
+To find your user ID, enable Developer Mode in Discord (Settings → Advanced → Developer Mode), then right-click your name and select **Copy User ID**.
+
+## Generating an encryption key
+
+```bash
+npm run keygen
+```
+
+This prints a randomly generated 48-character hex string. Set it as `ENCRYPTION_KEY`. The same script is available when using Docker:
+
+```bash
+docker run --rm eartharoid/discord-tickets:4.0 node /app/scripts/keygen
+```
+
+## Database connection strings
+
+<Tabs>
+  <Tab title="MySQL">
+    ```bash
+    DB_PROVIDER=mysql
+    DB_CONNECTION_URL=mysql://user:password@host:3306/database
+    ```
+  </Tab>
+  <Tab title="PostgreSQL">
+    ```bash
+    DB_PROVIDER=postgresql
+    DB_CONNECTION_URL=postgresql://user:password@host:5432/database
+    ```
+  </Tab>
+  <Tab title="SQLite">
+    ```bash
+    DB_PROVIDER=sqlite
+    # DB_CONNECTION_URL is optional; defaults to ./user/database.db
+    DB_CONNECTION_URL=file:./user/database.db
+    ```
+  </Tab>
+</Tabs>
+
+## config.yml
+
+At runtime the bot reads `./user/config.yml` (relative to the project root). The defaults are:
+
+```yaml config.yml
+logs:
+  files:
+    directory: ./logs
+    enabled: true
+    keepFor: 30
+  level: info
+presence:
+  activities:
+    - name: /new
+    - name: with {totalTickets} tickets
+    - name: "{openTickets} tickets"
+      type: 3
+    - name: "{avgResponseTime} response time"
+      type: 3
+    - name: "{avgRating} \u2b50 rating"
+      type: 3
+  interval: 20
+  status: online
+stats: true
+templates:
+  transcript: transcript.md
+updates: true
+```
+
+Edit this file to change the bot's presence activities, log level, log retention, or to disable automatic update checks.
+
+## Reverse proxy
+
+If you place the bot behind a reverse proxy (nginx, Caddy, Traefik, etc.):
+
+1. Set `HTTP_TRUST_PROXY=true`.
+2. Set `HTTP_EXTERNAL` to the public HTTPS URL your proxy serves.
+3. Proxy traffic to `HTTP_HOST:HTTP_PORT` (for example, `0.0.0.0:8169`).

@@ -1,0 +1,87 @@
+---
+title: "Configuring tags"
+description: "Create canned responses that staff can send in tickets using slash commands or automatic pattern matching."
+---
+
+Tags are saved text snippets that staff can send quickly inside a ticket channel. They work as canned responses, saving time on frequently repeated replies. Tags can also trigger automatically when a ticket message matches a regular expression pattern.
+
+## Creating a tag
+
+<Steps>
+  <Step title="Open the dashboard">
+    Navigate to your dashboard URL and select your server.
+  </Step>
+  <Step title="Go to Tags">
+    Click **Tags** in the left sidebar.
+  </Step>
+  <Step title="Click New tag">
+    Click the **New tag** button to open the tag creation form.
+  </Step>
+  <Step title="Fill in the fields">
+    Provide a name and content. Optionally add a regular expression for automatic triggering.
+  </Step>
+  <Step title="Save">
+    Click **Save** to create the tag.
+  </Step>
+</Steps>
+
+## Tag fields
+
+<ParamField path="name" type="string" required>
+  The unique name of the tag within the guild. Used as the argument to the `/tag` slash command.
+
+  Names must be unique per guild — the database enforces a unique constraint on `(guildId, name)`.
+
+  ```
+  /tag name:refund-policy
+  ```
+</ParamField>
+
+<ParamField path="content" type="string" required>
+  The text content of the tag. Supports Discord markdown (bold, italics, code blocks, links, etc.).
+
+  This text is sent as a message in the ticket channel when the tag is used.
+</ParamField>
+
+<ParamField path="regex" type="string">
+  An optional [regular expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions) pattern. When set, the bot automatically sends this tag's content in a ticket when a user's message matches the pattern.
+
+  ```
+  (?i)refund|money back
+  ```
+
+  <Note>
+  Regex matching uses the `guild-tags` cache (keyed as `cache/guild-tags:{guildId}`) with a 1-hour TTL. Changes to tag regex patterns take effect within one hour, or immediately after a bot restart.
+  </Note>
+</ParamField>
+
+## Using tags in tickets
+
+Staff use the `/tag` slash command to send a tag in the current ticket channel:
+
+```
+/tag name:<tag-name>
+```
+
+The tag name autocompletes as you type.
+
+## Automatic tagging
+
+When `regex` is set on a tag, the bot monitors incoming messages in ticket channels and sends the tag content automatically when a message matches the pattern. This is useful for catching common questions and providing instant responses.
+
+The `autoTag` guild setting controls the scope of automatic tagging. It accepts:
+
+| Value       | Behaviour                                                      |
+|-------------|----------------------------------------------------------------|
+| `ticket`    | Only trigger on messages from the ticket creator               |
+| `!ticket`   | Only trigger on messages from users who are not the creator    |
+| `all`       | Trigger on messages from any user                              |
+| Array       | An array of specific tag IDs to enable auto-triggering for     |
+
+You can configure `autoTag` in the guild **Settings** section of the dashboard.
+
+## Editing and deleting tags
+
+To edit a tag, click it in the tag list, update the fields, and save. To delete a tag, open it and click the delete button.
+
+When a tag is created, updated, or deleted, the bot immediately refreshes the `cache/guild-tags:{guildId}` cache so the slash command autocomplete and regex matching use the latest data.

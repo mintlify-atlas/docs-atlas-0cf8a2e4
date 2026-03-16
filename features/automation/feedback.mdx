@@ -1,0 +1,65 @@
+---
+title: "Feedback"
+description: "Collect star ratings and optional comments from users when they close a ticket."
+---
+
+When feedback is enabled for a category, users are asked to rate their support experience before a ticket is closed. Ratings feed into the statistics shown in the dashboard and available via the `/transcript` template.
+
+## How feedback is collected
+
+Feedback is requested at the start of the close flow, before the close confirmation is sent to staff. This ensures the rating reflects the experience up to that point.
+
+<Steps>
+  <Step title="User initiates close">
+    The ticket creator clicks the **Close** button or runs `/close`.
+  </Step>
+  <Step title="Feedback modal appears">
+    Because `enableFeedback` is true for the category and no feedback exists yet for this ticket, a Discord modal is shown immediately.
+  </Step>
+  <Step title="User submits rating">
+    The user fills in the modal and submits. The rating and optional comment are saved encrypted in the database.
+  </Step>
+  <Step title="Close request continues">
+    The close request message (with Accept / Reject buttons) is posted in the ticket channel as normal.
+  </Step>
+</Steps>
+
+<Note>
+Feedback is only requested **once** per ticket. If the user has already submitted a rating (e.g. from a previous close attempt), the modal is skipped.
+</Note>
+
+## The feedback modal
+
+| Field | Type | Required | Constraints |
+|---|---|---|---|
+| Rating | Short text | Yes | 1–3 characters, must be a number between 1 and 5 |
+| Comment | Paragraph | No | 4–1000 characters |
+
+## Where feedback appears
+
+<CardGroup cols={2}>
+  <Card title="Close DM" icon="envelope">
+    The DM sent to the ticket creator after closure includes the star rating (displayed as ⭐ emoji) and the score out of 5.
+  </Card>
+  <Card title="Log channel" icon="list">
+    The close log event includes the rating and comment.
+  </Card>
+  <Card title="Transcript" icon="file">
+    The HTML transcript includes the rating and comment fields.
+  </Card>
+  <Card title="Statistics" icon="chart-bar">
+    Ratings are aggregated to compute the average rating (`avgRating`) per category and per guild, available in the dashboard and as opening-message variables.
+  </Card>
+</CardGroup>
+
+## Using the average rating in opening messages
+
+You can display the category's current average rating in the ticket opening message using the `{avgRating}` variable. The value is calculated from all closed tickets in the category that have a feedback entry and is cached for one hour.
+
+```
+Hi {username}! Our average rating is {avgRating}/5 ⭐
+```
+
+## Enabling feedback
+
+Feedback is enabled per category from the **Settings panel** in the web dashboard. Toggle the **Enable feedback** option for the relevant category.

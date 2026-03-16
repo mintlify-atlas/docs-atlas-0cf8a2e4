@@ -1,0 +1,48 @@
+---
+title: "/tag"
+description: "Send a pre-configured tag (canned response) in the current channel."
+---
+
+The `/tag` command posts the content of a saved tag — a short, reusable message configured by administrators — into the current channel. Tags are useful for frequently-asked questions, policy reminders, or standard responses.
+
+## Who can use it
+
+All server members with access to the current channel can use `/tag`. Tags are commonly used by staff for quick responses, but there is no built-in restriction.
+
+## Options
+
+<ParamField query="tag" type="integer" required>
+  The tag to send. Supports autocomplete — start typing the tag name to filter
+  the list.
+</ParamField>
+
+<ParamField query="for" type="user" optional>
+  A user to mention alongside the tag content. When provided, the tag reply is
+  sent publicly and mentions the specified user. When omitted, the reply is
+  sent ephemerally (visible only to you).
+</ParamField>
+
+## Example usage
+
+```
+/tag tag:FAQ
+```
+
+```
+/tag tag:Refund Policy for:@Alice
+```
+
+## What happens after you run it
+
+- If `for` is provided: the tag content is posted publicly in the channel with the specified user mentioned.
+- If `for` is omitted: the tag content is sent as an ephemeral reply visible only to you.
+
+<Tip>
+  Use the `for` option to direct a canned response at a specific user — for
+  example, to point them to the correct documentation or policy without typing
+  it out manually.
+</Tip>
+
+<Note>
+  Tags are created and managed by administrators in the bot's settings portal.
+</Note>

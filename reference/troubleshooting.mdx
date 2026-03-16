@@ -1,0 +1,113 @@
+---
+title: "Troubleshooting"
+description: "Solutions to common issues when running Discord Tickets."
+---
+
+## Authentication and login issues
+
+<AccordionGroup>
+  <Accordion title="I'm redirected to login but immediately get an error">
+    This usually means the `oauth2-state` cookie was not set before the OAuth2 callback was received. Possible causes:
+
+    - Your browser is blocking cookies for the dashboard domain.
+    - Your reverse proxy is stripping cookies. Ensure it passes `Set-Cookie` headers through unchanged.
+    - The `HTTP_EXTERNAL` environment variable does not match the URL you are accessing the dashboard from. Discord's redirect URI must exactly match the registered URI.
+
+    Check that `HTTP_EXTERNAL` is set to the externally accessible URL of your bot, including the protocol (e.g. `https://tickets.example.com`).
+  </Accordion>
+
+  <Accordion title="My token expired and I can't log in">
+    Tokens expire when the underlying Discord OAuth2 access token expires (typically after 7 days). Log out by visiting `/auth/logout` then log in again at `/auth/login`.
+
+    If you have set `INVALIDATE_TOKENS` to a recent timestamp, all existing sessions have been invalidated. Users need to log in again.
+  </Accordion>
+
+  <Accordion title="Admin panel shows 'Extra scopes required; reauthenticate'">
+    The settings panel requires the `applications.commands.permissions.update` OAuth2 scope. Log out and log back in — the dashboard should redirect you to `GET /auth/login?role=admin` automatically, which requests the additional scope.
+  </Accordion>
+</AccordionGroup>
+
+## Bot permissions
+
+<AccordionGroup>
+  <Accordion title="The bot can't send messages in the log channel">
+    The problems endpoint (`GET /api/admin/guilds/:guild/problems`) reports this as `logChannelMissingPermission`. Ensure the bot has both `Send Messages` and `Embed Links` permissions in the configured log channel.
+  </Accordion>
+
+  <Accordion title="Ticket channels are not being created">
+    The bot needs the following permissions in the Discord category where ticket channels are created:
+
+    - `View Channel`
+    - `Send Messages`
+    - `Read Message History`
+    - `Embed Links`
+    - `Attach Files`
+    - `Manage Channels` (to create and delete ticket channels)
+
+    Check that the bot's role has these permissions, and that no channel-level overwrites are denying them.
+  </Accordion>
+
+  <Accordion title="Slash command permissions are not updating">
+    Updating application command permissions requires the `applications.commands.permissions.update` OAuth2 scope. Make sure you authenticated with the admin scope when saving category changes. If not, log out, log back in with the admin scope, then save the category again.
+  </Accordion>
+</AccordionGroup>
+
+## Panel issues
+
+<AccordionGroup>
+  <Accordion title="Panel fails to send with an emoji error">
+    If a category's emoji is set to a custom emoji that no longer exists in the server, Discord will reject the panel. The API returns a `400` error with an `invalid_emoji` type. Go to the category's settings page and update or remove the emoji.
+  </Accordion>
+
+  <Accordion title="A BUTTON panel with multiple categories isn't sending">
+    Discord limits action rows to 5 buttons. If you have more than 5 categories on a `BUTTON` panel, the request will fail. Use a `MENU` (select menu) panel type for more than 5 categories.
+  </Accordion>
+</AccordionGroup>
+
+## Export and import
+
+<AccordionGroup>
+  <Accordion title="Export returns 429 Too Many Requests">
+    Only one export can run per guild at a time. If a previous export request is still in progress (or failed without releasing the lock), subsequent requests return `429`. Wait a minute and try again — the lock expires automatically after 60 seconds.
+  </Accordion>
+
+  <Accordion title="Import fails with a category error">
+    If the import log shows a category ID mismatch or a missing category, it means the archive's `settings.json` references category IDs that couldn't be remapped. Ensure you are importing into a guild that has no existing ticket data, or reset the guild settings first using `DELETE /api/admin/guilds/:guild`.
+  </Accordion>
+
+  <Accordion title="Tickets are missing after import">
+    The import streams progress as HTML. Check the full output for any `ERROR` lines. Common causes include a corrupted ZIP file, a version mismatch between the exporting and importing bot, or a database constraint violation if tickets with the same IDs already exist.
+  </Accordion>
+</AccordionGroup>
+
+## Stale ticket handling
+
+<AccordionGroup>
+  <Accordion title="Stale tickets are not being closed automatically">
+    Auto-close for stale tickets is disabled on public bots (`PUBLIC_BOT=true`). If you are running a private bot and stale handling is still not working, verify that the stale message threshold and timeout are configured in the guild settings.
+
+    The stale check was updated in v4.0.49 — the threshold was changed from 5 messages to 1 message before a ticket is considered for stale handling.
+  </Accordion>
+
+  <Accordion title="Staff offline messages are not appearing">
+    This was a known bug fixed in v4.0.46. Ensure you are running at least v4.0.46.
+  </Accordion>
+</AccordionGroup>
+
+## Database
+
+<AccordionGroup>
+  <Accordion title="The bot fails to start with a Prisma migration error">
+    Run the Prisma migration command for your database engine. For SQLite:
+
+    ```bash
+    npx prisma migrate deploy
+    ```
+
+    If you are upgrading from a previous version, check the CHANGELOG for any breaking database schema changes.
+  </Accordion>
+
+  <Accordion title="'Guild not found' errors in the API">
+    The bot only serves API requests for guilds it is currently a member of. If the bot was removed from a guild, all API endpoints for that guild return `404`. Re-invite the bot and the endpoints will start responding again.
+  </Accordion>
+</AccordionGroup>

@@ -1,97 +1,98 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Discord Tickets"
+description: "The most popular open-source, self-hosted ticket management bot for Discord — a free alternative to premium ticketing solutions."
 ---
 
-## Setting up
-
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Get Started" icon="rocket" href="/self-hosting/installation/overview">
+    Deploy your own ticket bot in minutes with Docker or manual installation.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Features" icon="stars" href="/features">
+    Explore all the powerful features Discord Tickets offers.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Commands" icon="terminal" href="/commands/slash/new">
+    Full reference for all slash commands available to users and staff.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Configuration" icon="sliders" href="/configuration/environment-variables">
+    Configure environment variables, the database, and the web dashboard.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## What is Discord Tickets?
 
-Everything you need to create world-class documentation.
+Discord Tickets is a free, open-source ticket management bot for Discord servers. It provides a complete support ticketing system with a rich web dashboard, slash commands, automated workflows, and detailed transcripts — all self-hosted on your own infrastructure.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+Trusted by thousands of Discord servers and used to create over **half a million tickets** since 2019, Discord Tickets is the community's go-to alternative to paid ticketing bots.
 
-## Need inspiration?
+<Note>
+  Discord Tickets is licensed under the **GPL-3.0** license. The source code is available on [GitHub](https://github.com/discord-tickets/bot).
+</Note>
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+## Hosting options
+
+<CardGroup cols={3}>
+  <Card title="Public Bot" icon="globe" href="https://discordtickets.app/public/">
+    Add the shared public bot instantly — great for testing. Branded with Discord Tickets branding.
+  </Card>
+  <Card title="Managed Hosting" icon="cloud" href="https://discordtickets.app/managed/">
+    Your own dedicated bot, hosted and managed for you. Easy setup, no server required.
+  </Card>
+  <Card title="Self-Hosted" icon="server" href="/self-hosting/installation/overview">
+    Full control — deploy on your own infrastructure using Docker or manual Node.js installation.
+  </Card>
+</CardGroup>
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Modern Discord interactions" icon="comment-dots">
+    Slash commands, buttons, select menus, and modals for a seamless user experience.
+  </Card>
+  <Card title="Flexible database support" icon="database">
+    Choose from MySQL, PostgreSQL, or SQLite to match your infrastructure.
+  </Card>
+  <Card title="Ticket archiving & transcripts" icon="scroll">
+    Messages are stored in the database and viewable as HTML transcripts at any time.
+  </Card>
+  <Card title="Custom question forms" icon="clipboard-question">
+    Ask up to 5 custom questions before a ticket is created to gather context upfront.
+  </Card>
+  <Card title="Tags & automation" icon="tag">
+    Pre-written tag responses let staff resolve common issues without opening tickets.
+  </Card>
+  <Card title="Auto-close inactive tickets" icon="clock">
+    Automatically close tickets that have been inactive for a configurable period.
+  </Card>
+  <Card title="Staff tools" icon="users">
+    Claim, release, move, transfer, and rename tickets to keep your support queue organised.
+  </Card>
+  <Card title="Statistics & feedback" icon="chart-bar">
+    Track staff performance with response time analytics and member feedback ratings.
+  </Card>
+  <Card title="Internationalisation" icon="language">
+    Available in more than 10 languages with community-contributed translations.
+  </Card>
+  <Card title="Docker support" icon="docker">
+    Reliable and quick deployment with the official Docker image and compose file.
+  </Card>
+</CardGroup>
+
+## Quick start
+
+<Steps>
+  <Step title="Create a Discord application">
+    Go to the [Discord Developer Portal](https://discord.com/developers/applications) and create a new application. See [Create a bot application](/getting-started/create-bot) for detailed steps.
+  </Step>
+  <Step title="Deploy the bot">
+    Deploy using [Docker](/self-hosting/installation/docker) (recommended) or [manually](/self-hosting/installation/manual) on your server.
+  </Step>
+  <Step title="Configure environment variables">
+    Set the required environment variables including `DISCORD_TOKEN`, `DISCORD_SECRET`, `ENCRYPTION_KEY`, and database settings. See [Configuration](/self-hosting/configuration).
+  </Step>
+  <Step title="Set up your first category">
+    Open the web dashboard and create your first ticket category with custom questions and permissions. See [First category](/getting-started/first-category).
+  </Step>
+  <Step title="Invite the bot to your server">
+    Generate an invite URL and add the bot to your Discord server. See [Invite the bot](/getting-started/invite).
+  </Step>
+</Steps>

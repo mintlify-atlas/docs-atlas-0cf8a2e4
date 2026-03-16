@@ -1,0 +1,35 @@
+---
+title: "/claim"
+description: "Claim a ticket so it is assigned to you as the handling staff member."
+---
+
+The `/claim` command assigns the current ticket to you. Claiming a ticket signals to other staff that you are handling it and, depending on configuration, may hide the ticket from other staff members' views.
+
+## Who can use it
+
+Staff members only. Non-staff members receive an error.
+
+## Options
+
+This command has no options.
+
+## Example usage
+
+```
+/claim
+```
+
+## What happens after you run it
+
+- The ticket is assigned to you in the database.
+- A message is posted in the ticket channel: *"@You has claimed this ticket."*
+- Other staff members can see who is responsible for the ticket.
+
+<Tip>
+  If you need to hand the ticket back to the pool, use
+  [`/release`](/commands/slash/release).
+</Tip>
+
+<Note>
+  You must run `/claim` from inside the ticket channel you want to claim.
+</Note>

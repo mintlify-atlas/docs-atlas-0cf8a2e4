@@ -1,0 +1,45 @@
+---
+title: "/close"
+description: "Request that the current ticket be closed."
+---
+
+The `/close` command submits a request to close the ticket in the current channel. Depending on how the server is configured, the close may require approval from a staff member or from the ticket creator before the channel is deleted.
+
+## Who can use it
+
+All server members can use `/close` inside a ticket channel they have access to.
+
+## Options
+
+<ParamField query="reason" type="string" optional>
+  The reason for closing the ticket. This is recorded in the close event and
+  may be included in the transcript and log channel.
+</ParamField>
+
+## Example usage
+
+```
+/close
+```
+
+```
+/close reason:Issue resolved, no further action needed
+```
+
+## What happens after you run it
+
+- **If staff approval is required:** a message is posted in the ticket asking staff to accept or reject the close request.
+- **If user approval is required:** a message is sent asking the ticket creator to confirm.
+- **If no approval is required:** the ticket is closed immediately and the channel is deleted after a short delay.
+
+<Note>
+  To close a ticket immediately without waiting for approval — or to close
+  tickets in bulk — use [`/force-close`](/commands/slash/force-close) (staff
+  only).
+</Note>
+
+<Warning>
+  Once a ticket is closed and the channel is deleted, the conversation is no
+  longer accessible through Discord. Use [`/transcript`](/commands/slash/transcript)
+  beforehand if you need a copy.
+</Warning>

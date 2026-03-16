@@ -1,0 +1,38 @@
+---
+title: "/topic"
+description: "Change the topic of the current ticket."
+---
+
+The `/topic` command opens a modal that lets you update the topic of the current ticket. The topic is a short description of what the ticket is about (5–100 characters).
+
+## Who can use it
+
+All members with access to the ticket channel can use `/topic`. The command must be run from inside the ticket channel.
+
+## Options
+
+This command has no slash-command options. Instead, it opens a modal dialog with a text input field.
+
+## Example usage
+
+```
+/topic
+```
+
+After running the command, a modal appears with a **Topic** text field. The current topic (if one exists) is pre-filled so you can edit it.
+
+## What happens after you run it
+
+1. A modal titled with the ticket's category name appears.
+2. You enter or edit the topic text (5–100 characters).
+3. On submission, the topic is encrypted and saved. The channel topic in Discord is also updated to reflect the new value.
+
+<Note>
+  The topic input requires a minimum of 5 characters and a maximum of 100
+  characters.
+</Note>
+
+<Tip>
+  A clear, specific topic helps staff understand the issue at a glance before
+  reading the full conversation.
+</Tip>

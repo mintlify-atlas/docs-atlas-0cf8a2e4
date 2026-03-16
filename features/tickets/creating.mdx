@@ -1,0 +1,79 @@
+---
+title: "Creating tickets"
+description: "The three ways users can open a new ticket: panel buttons, select menus, and the /new slash command."
+---
+
+A new ticket can be opened in three ways. All three routes converge on the same creation logic, so the resulting channel is identical regardless of which method the user chose.
+
+## Panel buttons
+
+Admins place a panel message in a public channel. Each button on the panel is linked to a specific category. When a user clicks a button:
+
+<Steps>
+  <Step title="Category is resolved">
+    The bot reads the `target` category ID encoded in the button's custom ID.
+  </Step>
+  <Step title="Pre-creation checks run">
+    The bot verifies the user is not rate-limited, not on the blocklist, not timed out, has any required roles, and has not exceeded the per-member open ticket limit or the category cooldown.
+  </Step>
+  <Step title="Questions or topic modal appears (if configured)">
+    If the category has questions, a modal with up to five text fields is shown. If the category requires a topic but has no questions, a single paragraph text input is shown instead.
+  </Step>
+  <Step title="Channel is created">
+    A private text channel is created inside the configured Discord category with permission overwrites granting access to the ticket creator, the bot, and all staff roles. The channel name is rendered from the category template, e.g. `support-{username}-{num}`.
+  </Step>
+  <Step title="Opening message is sent and pinned">
+    An embed showing the creator and any question answers or topic is posted and pinned. A close button and, if enabled, a claim button are attached.
+  </Step>
+</Steps>
+
+## Select menus
+
+When a server has more than one category, clicking any generic "open ticket" button (or using `/new` without specifying a category) shows an ephemeral select menu listing all available categories. Selecting a category then follows the same flow as clicking a category-specific button.
+
+## The `/new` command
+
+Users can open a ticket at any time with the `/new` slash command.
+
+```
+/new [references: <ticket-id>]
+```
+
+The optional `references` parameter accepts the ID of a previous ticket. When provided, the new ticket channel will contain an embed summarising the referenced ticket (number, date, topic). If archiving is enabled, a "Get transcript" button is also included.
+
+<Note>
+The `references` parameter autocompletes from the user's own closed tickets.
+</Note>
+
+## Working-hours notice
+
+After the ticket channel is created, the bot checks whether the current time falls within the guild's configured working hours. If staff are outside their working hours, an additional embed is posted informing the user when to expect a response — either later today or on the next working day.
+
+## Staff offline notice
+
+If working hours are currently active but no staff member with access to the channel is online, a separate embed is posted noting that all staff are currently offline.
+
+## Rate limiting
+
+| Limit | Scope | Duration |
+|---|---|---|
+| Global interaction rate limit | Per user, per guild | 5 seconds |
+| Category cooldown | Per user, per category | Configured per category |
+| Member open ticket limit | Per user, per category | While any tickets remain open |
+| Discord category full | Per Discord category | Until a ticket is closed |
+
+<Warning>
+If the Discord category that tickets are placed into already contains 50 channels, new ticket creation will fail with a "category full" error until an existing ticket is closed.
+</Warning>
+
+## Opening message variables
+
+The opening message template (configured per category) supports the following placeholders:
+
+| Variable | Value |
+|---|---|
+| `{username}` or `{name}` | The ticket creator's username |
+| `{num}` or `{number}` | The ticket's sequential number |
+| `{avgResponseTime}` | Average first-response time for this category |
+| `{avgResolutionTime}` | Average ticket resolution time for this category |
+| `{avgRating}` | Average feedback rating for this category |

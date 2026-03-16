@@ -1,0 +1,38 @@
+---
+title: "/transfer"
+description: "Transfer ownership of the current ticket to another server member."
+---
+
+The `/transfer` command changes the ticket creator to a different server member. The channel name and topic are updated to reflect the new owner, and permission overwrites are adjusted so the new owner has full access.
+
+## Who can use it
+
+Any member with access to the ticket channel can use `/transfer`. There is no staff-only restriction enforced at the command level; access to the ticket channel itself acts as the gate.
+
+## Options
+
+<ParamField query="member" type="user" required>
+  The server member to transfer ticket ownership to.
+</ParamField>
+
+## Example usage
+
+```
+/transfer member:@Charlie
+```
+
+## What happens after you run it
+
+1. The ticket's `createdBy` field is updated to the new member in the database.
+2. The channel name is regenerated using the new member's username and display name (using the category's channel name template).
+3. The channel topic is updated to mention the new owner.
+4. The new member receives permission overwrites granting them full ticket access (`ViewChannel`, `SendMessages`, `ReadMessageHistory`, `EmbedLinks`, `AttachFiles`).
+5. A message is posted in the channel confirming the transfer.
+
+<Note>
+  If you are the original ticket creator and you transfer the ticket, the
+  confirmation message reads: *"@You has transferred this ticket to @NewOwner."*
+  If a third party (e.g. a staff member) performs the transfer, the message
+  also includes the original owner: *"@Staff has transferred this ticket from
+  @OriginalOwner to @NewOwner."*
+</Note>

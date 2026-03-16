@@ -1,0 +1,47 @@
+---
+title: "/tickets"
+description: "List your open and closed tickets, or view another member's tickets."
+---
+
+The `/tickets` command displays a summary of a member's ticket history, including all currently open tickets and up to the 10 most recently closed tickets.
+
+## Who can use it
+
+- **All members** — can view their own tickets.
+- **Staff members** — can view tickets belonging to any member, filtered to categories where they have a staff role. Members with the **Manage Server** permission (or configured super-users) can view tickets across all categories.
+
+## Options
+
+<ParamField query="member" type="user" optional>
+  The member whose tickets you want to list. Defaults to yourself when omitted.
+  Only staff members can specify another member.
+</ParamField>
+
+## Example usage
+
+```
+/tickets
+```
+
+```
+/tickets member:@Dave
+```
+
+## What happens after you run it
+
+You receive an ephemeral embed showing:
+
+- **Open tickets** — a list of currently open ticket channels with their topics (truncated to 30 characters).
+- **Closed tickets** — up to 10 recently closed tickets, each showing the category name, ticket number, channel ID, and topic.
+
+If archiving is enabled on the server, the embed description includes a link to use [`/transcript`](/commands/slash/transcript) to download a ticket's transcript.
+
+<Note>
+  The closed tickets list is limited to the 10 most recent entries. To browse
+  older tickets, use the bot's web portal.
+</Note>
+
+<Warning>
+  Non-staff members who attempt to view another member's tickets will receive
+  an error.
+</Warning>

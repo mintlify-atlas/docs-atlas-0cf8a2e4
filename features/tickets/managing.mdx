@@ -1,0 +1,95 @@
+---
+title: "Managing tickets"
+description: "Adding and removing members, setting priority, updating the topic, renaming, and transferring ownership of open tickets."
+---
+
+Once a ticket is open, several commands let you adjust who can see it, how it appears in the channel list, and what context it carries.
+
+## Adding members
+
+```
+/add member: <@user> [ticket: <id>]
+```
+
+Grants a Discord member access to a ticket channel. The member receives the `ViewChannel`, `ReadMessageHistory`, `SendMessages`, `EmbedLinks`, and `AttachFiles` permissions on that channel.
+
+- When run **inside** a ticket channel, the `ticket` parameter is optional and defaults to the current ticket.
+- When run **outside** a ticket channel, the `ticket` parameter is required and autocompletes from open tickets you have access to.
+- Staff can add members to any ticket in categories they manage. The ticket creator can add members to their own tickets.
+
+An embed is posted in the ticket channel announcing who was added and by whom.
+
+## Removing members
+
+```
+/remove member: <@user> [ticket: <id>]
+```
+
+Revokes a member's channel permission overwrite, removing their access. The bot and the ticket creator cannot be removed.
+
+An embed is posted in the ticket channel announcing who was removed and by whom.
+
+## Setting priority
+
+```
+/priority priority: <HIGH|MEDIUM|LOW>
+```
+
+Staff-only. Sets the visual priority of the ticket by prepending a coloured circle emoji to the channel name:
+
+| Priority | Emoji | Channel name example |
+|---|---|---|
+| HIGH | 🔴 | `🔴support-eartharoid-42` |
+| MEDIUM | 🟠 | `🟠support-eartharoid-42` |
+| LOW | 🟢 | `🟢support-eartharoid-42` |
+
+Changing priority updates the channel name in place. When a close request is issued, the priority is automatically reset to `LOW`.
+
+<Note>
+The `/priority` command can only be used inside a ticket channel.
+</Note>
+
+## Updating the topic
+
+```
+/topic
+```
+
+Opens a modal pre-filled with the current topic text. Submitting the modal updates the stored topic. Any member can update the topic of their own ticket; staff can update the topic of any ticket.
+
+Alternatively, the **Edit** button on the opening message opens the same modal (or the question-answers modal if the ticket was created with questions).
+
+## Renaming the channel
+
+```
+/rename name: <new-name>
+```
+
+Renames the ticket channel to any string between 1 and 100 characters. The command is rate-limited to **two renames per 10 minutes** per channel to stay within Discord's channel-edit rate limits.
+
+The ticket creator and staff can rename a ticket.
+
+## Transferring ownership
+
+```
+/transfer member: <@user>
+```
+
+Transfers the ticket to a different user, making them the new creator. The original creator loses their permission overwrite and the new owner gains one. The channel name and topic are updated to reflect the new owner's username and display name.
+
+<Warning>
+Transfer does not check staff permissions — any member currently in the ticket can run this command. Restrict access to this command via Discord's command permission settings if needed.
+</Warning>
+
+## Listing your tickets
+
+```
+/tickets [member: <@user>]
+```
+
+Returns an ephemeral embed showing:
+
+- **Open tickets** — channel mentions with an optional topic preview (first 30 characters).
+- **Closed tickets** — up to the 10 most recently closed tickets, showing category name, ticket number, channel ID, and topic preview.
+
+Staff can pass a `member` argument to view another user's tickets, filtered to categories the requesting staff member manages. If archiving is enabled, the embed description includes a reminder to use `/transcript` to retrieve a closed ticket's archive.

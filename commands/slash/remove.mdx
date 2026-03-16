@@ -1,0 +1,47 @@
+---
+title: "/remove"
+description: "Remove a server member from a ticket channel."
+---
+
+The `/remove` command revokes a member's access to a ticket channel by deleting their permission overwrite.
+
+## Who can use it
+
+- **Ticket creator** — can remove members from their own ticket.
+- **Staff members** — can remove members from any ticket.
+
+Non-staff members cannot remove users from tickets they did not create.
+
+## Options
+
+<ParamField query="member" type="user" required>
+  The server member to remove from the ticket.
+</ParamField>
+
+<ParamField query="ticket" type="string" optional>
+  The ticket to remove the member from. Defaults to the current channel if not
+  specified. Supports autocomplete.
+</ParamField>
+
+## Example usage
+
+```
+/remove member:@Bob
+```
+
+```
+/remove member:@Bob ticket:abc123
+```
+
+## What happens after you run it
+
+1. The bot deletes the member's permission overwrite for the ticket channel.
+2. A message is posted in the ticket channel announcing that the member was removed.
+3. You receive an ephemeral confirmation message.
+
+The event is also logged to the configured log channel.
+
+<Warning>
+  You cannot remove the ticket creator or the bot itself using this command.
+  Attempting to do so returns an error.
+</Warning>

@@ -1,0 +1,70 @@
+---
+title: "Transcripts"
+description: "How Discord Tickets archives messages and generates downloadable HTML transcripts."
+---
+
+When archiving is enabled for a guild, every message sent inside a ticket channel is saved to the database in real time. When a ticket is closed or a transcript is explicitly requested, that archive is rendered into a downloadable file using a Mustache template.
+
+## How archiving works
+
+Each incoming message triggers the archiver, which saves:
+
+- The **message content** (encrypted at rest)
+- Timestamps, edit status, and whether the message is from an external source
+- Attachments, embeds, components, and message references
+- **User metadata** — username, display name (encrypted), discriminator, avatar hash, and highest hoisted role
+- **Role metadata** — name and hex colour for any role mentioned or held by a message author
+- **Channel metadata** — name and ID for any channel mentioned
+
+All user-identifiable fields (username, display name) are encrypted using the instance's configured encryption key before being written to the database.
+
+<Note>
+Archiving can be disabled globally by setting the `OVERRIDE_ARCHIVE` environment variable to `false`. When disabled, no messages are saved and `/transcript` will not work.
+</Note>
+
+## Getting a transcript
+
+### After ticket close
+
+When a ticket is closed and archiving is enabled, the DM sent to the ticket creator includes a **Get transcript** button. The ticket creator can click this at any time after closure to receive their transcript.
+
+### The `/transcript` command
+
+```
+/transcript ticket: <id|number> [member: <@user>]
+```
+
+Requests a transcript for any closed ticket. The `ticket` parameter autocompletes and accepts either the full Discord channel ID or the short ticket number (e.g. `42`).
+
+The command replies ephemerally with the rendered file attached.
+
+**Access rules:**
+
+| Who | Can access |
+|---|---|
+| Ticket creator | Their own tickets, from anywhere (including DMs) |
+| Staff (category role) | Tickets in categories they manage |
+| Manage Guild permission | All tickets in the guild |
+| Supers (configured user IDs) | All tickets on the instance |
+
+### From inside a new ticket
+
+When a ticket is created with a `references` parameter pointing to a previous ticket, the new ticket channel contains a **Get transcript** button for the referenced ticket (if archiving is enabled).
+
+## Transcript format
+
+Transcripts are rendered using a Mustache template. The default template produces an HTML file. The template and output format are configurable via the `templates.transcript` key in `user/config.yml`.
+
+The rendered file includes:
+
+- Guild name, channel name, and ticket number
+- Full timestamps for creation and closure (formatted per the guild's locale)
+- Pinned message IDs
+- All archived messages in chronological order, with author avatars, roles, and colours
+- Question/answer pairs
+- Feedback rating and comment (if provided)
+- Closer and close reason
+
+## The `/tickets` command and transcript links
+
+The `/tickets` command lists a user's open and closed tickets. When archiving is enabled, the embed description includes a reminder to use `/transcript <id>` to retrieve archives of closed tickets (the list is capped at 10 recent closed tickets).

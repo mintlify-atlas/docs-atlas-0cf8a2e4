@@ -1,0 +1,116 @@
+---
+title: "Tickets"
+description: "API endpoints for querying a user's own tickets and for admin-level ticket management."
+---
+
+## Get your tickets in a guild
+
+`GET /api/guilds/:guild/tickets/@me`
+
+Returns all tickets that the authenticated user created in the specified guild.
+
+**Authentication:** required (`authenticate`, `isMember`)
+
+### Path parameters
+
+<ParamField path="guild" type="string" required>
+  Discord guild ID.
+</ParamField>
+
+### Response
+
+Array of ticket records from the database.
+
+<ResponseField name="[]" type="array">
+  <Expandable title="Ticket object">
+    <ResponseField name="id" type="string">Unique ticket ID.</ResponseField>
+    <ResponseField name="guildId" type="string">Discord guild ID the ticket belongs to.</ResponseField>
+    <ResponseField name="createdById" type="string">Discord user ID of the ticket creator.</ResponseField>
+    <ResponseField name="categoryId" type="number">ID of the category the ticket was opened in.</ResponseField>
+    <ResponseField name="number" type="number">Sequential ticket number within the guild.</ResponseField>
+    <ResponseField name="open" type="boolean">Whether the ticket is currently open.</ResponseField>
+    <ResponseField name="createdAt" type="string">ISO 8601 creation timestamp.</ResponseField>
+    <ResponseField name="closedAt" type="string">ISO 8601 close timestamp, or `null` if still open.</ResponseField>
+    <ResponseField name="topic" type="string">Ticket topic entered by the user (encrypted at rest), or `null`.</ResponseField>
+    <ResponseField name="firstResponseAt" type="string">Timestamp of the first staff response, or `null`.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## List tickets (admin)
+
+`GET /api/admin/guilds/:guild/tickets`
+
+Returns all tickets for a guild. Encrypted fields (`topic`, `closedReason`) are decrypted before returning.
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Path parameters
+
+<ParamField path="guild" type="string" required>
+  Discord guild ID.
+</ParamField>
+
+### Query parameters
+
+<ParamField query="since" type="string">
+  Filter tickets created at or after this time. Accepts a Unix timestamp in seconds, or an ISO 8601 date string.
+</ParamField>
+
+### Response
+
+Array of decrypted ticket objects, ordered by `createdAt` ascending.
+
+<ResponseField name="[]" type="array">
+  <Expandable title="Ticket object">
+    <ResponseField name="id" type="string">Ticket ID.</ResponseField>
+    <ResponseField name="guildId" type="string">Guild ID.</ResponseField>
+    <ResponseField name="number" type="number">Sequential ticket number.</ResponseField>
+    <ResponseField name="open" type="boolean">Whether the ticket is open.</ResponseField>
+    <ResponseField name="createdById" type="string">Creator's Discord user ID.</ResponseField>
+    <ResponseField name="categoryId" type="number">Category ID.</ResponseField>
+    <ResponseField name="topic" type="string">Decrypted ticket topic, or `null`.</ResponseField>
+    <ResponseField name="closedReason" type="string">Decrypted close reason, or `null`.</ResponseField>
+    <ResponseField name="createdAt" type="string">ISO 8601 creation timestamp.</ResponseField>
+    <ResponseField name="closedAt" type="string">ISO 8601 close timestamp, or `null`.</ResponseField>
+    <ResponseField name="firstResponseAt" type="string">Timestamp of first staff response, or `null`.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## Get a ticket (admin)
+
+`GET /api/admin/guilds/:guild/tickets/:ticket`
+
+Returns a single ticket with all related data, including archived messages, channels, roles, users, feedback, and question answers. Returns the full exported JSON representation.
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Path parameters
+
+<ParamField path="guild" type="string" required>
+  Discord guild ID. Used to prevent cross-guild access.
+</ParamField>
+
+<ParamField path="ticket" type="string" required>
+  Ticket ID.
+</ParamField>
+
+### Response
+
+The ticket's full exported JSON object as a string (Content-Type: `application/json`). Includes the following relations:
+
+<ResponseField name="archivedChannels" type="array">Archived channel records.</ResponseField>
+<ResponseField name="archivedMessages" type="array">Archived message records.</ResponseField>
+<ResponseField name="archivedRoles" type="array">Archived role records.</ResponseField>
+<ResponseField name="archivedUsers" type="array">Archived user records.</ResponseField>
+<ResponseField name="feedback" type="object">Feedback record, or `null`.</ResponseField>
+<ResponseField name="questionAnswers" type="array">Answers to the category's pre-open questions.</ResponseField>
+
+### Error codes
+
+| Status | Meaning |
+|--------|---------|
+| `404` | Ticket not found or does not belong to the specified guild |

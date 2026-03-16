@@ -1,0 +1,128 @@
+---
+title: "Configuring categories"
+description: "Create and configure ticket categories to organise incoming support requests by type."
+---
+
+Categories are the core building block of Discord Tickets. Each category represents a type of ticket (for example, "Support", "Bug Report", or "Partnership"). Users select a category when creating a ticket.
+
+## Creating a category
+
+<Steps>
+  <Step title="Open the dashboard">
+    Navigate to your dashboard URL and select your server.
+  </Step>
+  <Step title="Go to Categories">
+    Click **Categories** in the left sidebar.
+  </Step>
+  <Step title="Click New category">
+    Click the **New category** button to open the category creation form.
+  </Step>
+  <Step title="Fill in the required fields">
+    At minimum, provide a name, emoji, description, staff roles, and opening message.
+  </Step>
+  <Step title="Save">
+    Click **Save**. The bot creates the Discord category channel automatically if you did not select an existing one.
+  </Step>
+</Steps>
+
+## Category fields
+
+### Basic settings
+
+<ParamField path="name" type="string" required>
+  The display name of the category. Shown to users when selecting a ticket type.
+</ParamField>
+
+<ParamField path="emoji" type="string" required>
+  An emoji shown next to the category name in panels and menus. Supports standard Unicode emoji (e.g. `:bug:`) and custom Discord server emoji IDs.
+</ParamField>
+
+<ParamField path="description" type="string" required>
+  A short description shown in select menu panels. Tells users what this category is for.
+</ParamField>
+
+<ParamField path="image" type="string">
+  An optional image URL displayed in the ticket panel embed for this category.
+</ParamField>
+
+### Discord channel settings
+
+<ParamField path="discordCategory" type="snowflake">
+  The ID of the Discord category channel where tickets are created. If left blank, the bot automatically creates a new Discord category channel named after the ticket category (with the emoji prefix if applicable).
+
+  When the bot creates a channel automatically, it sets up the correct permission overwrites: `@everyone` cannot view the channel, but the bot and all staff roles can.
+</ParamField>
+
+<ParamField path="channelName" type="string">
+  The naming template for individual ticket channels. Defaults to `ticket-{num}` if not set. The `{num}` placeholder is replaced with the ticket's sequential number.
+
+  Example values: `ticket-{num}`, `support-{num}`, `{num}-ticket`
+</ParamField>
+
+### Staff and access
+
+<ParamField path="staffRoles" type="array" required>
+  The Discord role IDs whose members are considered staff for this category. Staff members can view and manage tickets in this category.
+
+  When you create or update a category, the bot updates Discord application command permissions so only these roles can use staff-only slash commands (`claim`, `force-close`, `move`, `priority`, `release`, and `Create ticket for user`).
+</ParamField>
+
+<ParamField path="requiredRoles" type="array">
+  Optional list of role IDs. Only users with at least one of these roles can create a ticket in this category. Leave empty to allow all server members.
+</ParamField>
+
+<ParamField path="pingRoles" type="array">
+  Optional list of role IDs to ping when a new ticket is created in this category. Useful for notifying an on-call team.
+</ParamField>
+
+### Limits and rate limiting
+
+<ParamField path="memberLimit" type="integer">
+  Maximum number of open tickets a single user can have in this category at the same time. Defaults to `1`.
+</ParamField>
+
+<ParamField path="totalLimit" type="integer">
+  Maximum total number of open tickets across all users in this category. Defaults to `50`.
+</ParamField>
+
+<ParamField path="cooldown" type="integer">
+  Optional cooldown in milliseconds between a user closing a ticket and being allowed to open another one in this category.
+</ParamField>
+
+<ParamField path="ratelimit" type="integer">
+  Optional rate limit in milliseconds between ticket creation attempts per user in this category.
+</ParamField>
+
+### Ticket behaviour
+
+<ParamField path="openingMessage" type="string" required>
+  The message sent inside the ticket channel when a new ticket is created. Supports Discord markdown. Shown to both the user and staff.
+</ParamField>
+
+<ParamField path="requireTopic" type="boolean">
+  When `true`, the user is prompted to enter a topic (subject line) when creating a ticket. Defaults to `false`.
+</ParamField>
+
+<ParamField path="customTopic" type="string">
+  A custom prompt shown to the user when `requireTopic` is enabled, replacing the default topic prompt.
+</ParamField>
+
+<ParamField path="claiming" type="boolean">
+  When `true`, staff can claim tickets in this category. A claimed ticket is assigned to a specific staff member. Defaults to `false`.
+</ParamField>
+
+<ParamField path="enableFeedback" type="boolean">
+  When `true`, users are prompted to rate their support experience after a ticket is closed in this category. Defaults to `false`.
+</ParamField>
+
+## Adding questions (forms)
+
+Each category can have a set of questions that are presented to the user in a modal form before the ticket is created. See the [forms configuration](/configuration/dashboard/forms) page for details.
+
+## Deleting a category
+
+Deleting a category removes it and all associated configuration from the database. Existing tickets that referenced the category are preserved but will no longer be linked to an active category.
+
+<Warning>
+Deleting a category does not delete the corresponding Discord category channel or any existing ticket channels. You must remove those manually from Discord if needed.
+</Warning>

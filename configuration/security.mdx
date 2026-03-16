@@ -1,0 +1,122 @@
+---
+title: "Security configuration"
+description: "Configure encryption, session token management, and superuser access for Discord Tickets."
+---
+
+## Encryption
+
+Discord Tickets uses the [`cryptr`](https://github.com/MauriceButler/cryptr) library (AES-256-GCM) to encrypt sensitive data stored in the database. Encryption is controlled by two environment variables.
+
+### ENCRYPTION_KEY
+
+The `ENCRYPTION_KEY` is required and must be at least 48 characters long. It serves two purposes:
+
+1. **Data encryption** — used to encrypt and decrypt sensitive values in the database.
+2. **JWT signing** — used as the secret for signing session tokens for the web dashboard.
+
+Generate a key with the built-in keygen script:
+
+```bash
+npm run keygen
+```
+
+The script generates a 48-character hex string using Node.js's `crypto.randomBytes(24)`:
+
+```js
+randomBytes(24).toString('hex') // produces a 48-char hex string
+```
+
+Set the output as your `ENCRYPTION_KEY`:
+
+```bash .env
+ENCRYPTION_KEY=a1b2c3d4e5f6...  # at least 48 characters
+```
+
+<Warning>
+**Do not lose your encryption key.** If you change or lose the key, all encrypted data in the database will become unreadable. Recovering from a lost key requires a full database reset.
+</Warning>
+
+### DISABLE_ENCRYPTION
+
+You can disable encryption entirely by setting `DISABLE_ENCRYPTION=true`. When disabled, data is stored in plaintext — encryption and decryption functions become pass-throughs.
+
+```bash .env
+DISABLE_ENCRYPTION=false  # default; encryption is active
+```
+
+<Warning>
+Disabling encryption reduces security. Only use this for development or debugging.
+</Warning>
+
+## Session tokens
+
+The web dashboard uses HTTP-only JWT cookies (`token`) to authenticate users. Tokens are signed with `ENCRYPTION_KEY` and have a fixed expiry tied to the Discord OAuth2 token lifetime.
+
+### Invalidating all tokens
+
+To force all current sessions to expire immediately — for example after a security incident — set `INVALIDATE_TOKENS` to a date string. Any token created before this date is rejected.
+
+```bash .env
+INVALIDATE_TOKENS=2024-06-01T00:00:00.000Z
+```
+
+All users will be required to log in again after the bot restarts with this value set.
+
+## Privilege levels
+
+Discord Tickets uses a numeric privilege system to determine what each user can do in the dashboard and via bot commands.
+
+| Level | Role         | Description                                                                                      |
+|-------|--------------|--------------------------------------------------------------------------------------------------|
+| `4`   | OPERATOR     | Superuser (`SUPER`). Can change settings for any guild, bypassing all Discord permission checks. |
+| `3`   | GUILD_OWNER  | Owner of the Discord server.                                                                     |
+| `2`   | GUILD_ADMIN  | Has the **Manage Guild** Discord permission.                                                     |
+| `1`   | GUILD_STAFF  | Has a staff role assigned to at least one ticket category.                                       |
+| `0`   | GUILD_MEMBER | A regular member of the server.                                                                  |
+| `-1`  | NONE         | Not a member of the server.                                                                      |
+
+The `isAdmin` middleware on protected API routes requires a privilege level of `2` (GUILD_ADMIN) or higher.
+
+## Superusers (SUPER)
+
+The `SUPER` environment variable defines a comma-separated list of Discord user IDs that are granted **OPERATOR** (level 4) privilege — the highest level.
+
+```bash .env
+SUPER=123456789012345678,987654321098765432
+```
+
+Superusers can:
+
+- Access and modify settings for **any** guild the bot is in, not just guilds where they are an admin.
+- Bypass all Discord guild permission checks.
+- View and manage tickets across all guilds.
+
+<Warning>
+Because superusers bypass all Discord permission checks, only add the Discord user IDs of people you fully trust. An operator can read and change settings for every server running your bot instance.
+</Warning>
+
+### Checking privilege level
+
+The privilege level is checked via the `getPrivilegeLevel` function in `src/lib/users.js`. The logic is:
+
+```js
+if (client.supers.includes(member.id))   return 4; // OPERATOR
+if (guild.ownerId === member.id)          return 3; // GUILD_OWNER
+if (member.permissions.has('ManageGuild')) return 2; // GUILD_ADMIN
+if (isStaff(guild, member.id))            return 1; // GUILD_STAFF
+return 0; // GUILD_MEMBER
+```
+
+Staff status is determined by whether the user holds any role assigned as a staff role in at least one ticket category for that guild.
+
+## OAuth2
+
+The dashboard uses Discord OAuth2 for authentication. The `DISCORD_SECRET` environment variable must match the OAuth2 client secret in your application on the Discord Developer Portal.
+
+The OAuth2 redirect URI is constructed from `HTTP_EXTERNAL`:
+
+```
+{HTTP_EXTERNAL}/auth/callback
+```
+
+Make sure this URL is listed as an authorised redirect URI in your Discord application's OAuth2 settings.

@@ -1,0 +1,150 @@
+---
+title: "Database configuration"
+description: "Configure Discord Tickets to use MySQL, PostgreSQL, or SQLite as your database backend."
+---
+
+Discord Tickets uses [Prisma](https://www.prisma.io/) as its ORM and supports three database providers. Set your choice with the `DB_PROVIDER` environment variable and provide a connection URL via `DB_CONNECTION_URL`.
+
+## Choosing a provider
+
+<CardGroup cols={3}>
+  <Card title="MySQL" icon="database">
+    Best for production deployments. Widely supported and well-tested. Requires a running MySQL 8+ server.
+  </Card>
+  <Card title="PostgreSQL" icon="database">
+    Production-ready alternative to MySQL. Does not require a `SHADOW_DATABASE_URL` for migrations.
+  </Card>
+  <Card title="SQLite" icon="hard-drive">
+    Zero-configuration option for development or small single-server deployments. Stores data in a local file. Not recommended for high-traffic production use.
+  </Card>
+</CardGroup>
+
+## MySQL
+
+Set `DB_PROVIDER=mysql` and provide a connection URL.
+
+```bash .env
+DB_PROVIDER=mysql
+DB_CONNECTION_URL=mysql://USER:PASSWORD@HOST:PORT/DATABASE
+```
+
+<Note>
+MySQL requires a `SHADOW_DATABASE_URL` for Prisma Migrate in some configurations. If you run into migration errors, create a second empty database and set `SHADOW_DATABASE_URL` to its connection string.
+</Note>
+
+### Docker Compose example
+
+The official Docker Compose file includes a ready-to-use MySQL 8 service:
+
+```yaml docker-compose.yml
+services:
+  mysql:
+    image: mysql:8
+    restart: unless-stopped
+    hostname: mysql
+    networks:
+      - discord-tickets
+    volumes:
+      - tickets-mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: tickets
+      MYSQL_PASSWORD: your_secure_password
+      MYSQL_ROOT_PASSWORD: your_secure_root_password
+      MYSQL_USER: tickets
+
+  bot:
+    image: eartharoid/discord-tickets:4.0
+    depends_on:
+      - mysql
+    environment:
+      DB_PROVIDER: mysql
+      DB_CONNECTION_URL: mysql://tickets:your_secure_password@mysql/tickets
+```
+
+Replace `your_secure_password` with a strong password. Use a different password for `MYSQL_ROOT_PASSWORD`.
+
+### Connection URL format
+
+```
+mysql://USER:PASSWORD@HOST:PORT/DATABASE
+```
+
+| Part       | Description                                           |
+|------------|-------------------------------------------------------|
+| `USER`     | Database username                                     |
+| `PASSWORD` | Database password                                     |
+| `HOST`     | Hostname or IP of the MySQL server                    |
+| `PORT`     | MySQL port, typically `3306`                          |
+| `DATABASE` | Name of the database                                  |
+
+## PostgreSQL
+
+Set `DB_PROVIDER=postgresql` and provide a connection URL.
+
+```bash .env
+DB_PROVIDER=postgresql
+DB_CONNECTION_URL=postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+```
+
+### Connection URL format
+
+```
+postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+```
+
+| Part       | Description                                           |
+|------------|-------------------------------------------------------|
+| `USER`     | Database username                                     |
+| `PASSWORD` | Database password                                     |
+| `HOST`     | Hostname or IP of the PostgreSQL server               |
+| `PORT`     | PostgreSQL port, typically `5432`                     |
+| `DATABASE` | Name of the database                                  |
+
+<Tip>
+PostgreSQL does not require a shadow database for Prisma migrations, making it slightly simpler to configure than MySQL.
+</Tip>
+
+## SQLite
+
+SQLite stores all data in a single local file. You do not need to set `DB_CONNECTION_URL` when using SQLite — the bot manages the file path automatically.
+
+```bash .env
+DB_PROVIDER=sqlite
+```
+
+<Warning>
+SQLite is not recommended for production deployments with significant traffic. Concurrent writes can cause performance issues. Use MySQL or PostgreSQL for production.
+</Warning>
+
+The data file is stored in the `user/` volume when running via Docker, or in the project directory when running manually.
+
+## Database schema
+
+The bot uses Prisma to manage the database schema. The schema includes the following main models:
+
+| Model              | Description                                                |
+|--------------------|------------------------------------------------------------|
+| `Guild`            | Per-server settings (colours, locale, working hours, etc.) |
+| `Category`         | Ticket categories with their configuration                 |
+| `Question`         | Form questions attached to categories                      |
+| `Tag`              | Canned responses (tags) for staff use                      |
+| `Ticket`           | Individual ticket records                                  |
+| `User`             | Discord user records                                       |
+| `Feedback`         | User feedback and ratings                                  |
+| `ArchivedMessage`  | Archived ticket message content                            |
+
+The schema files for each provider are located in the `db/` directory of the source repository:
+
+```
+db/
+├── mysql/
+│   └── schema.prisma
+├── postgresql/
+│   └── schema.prisma
+└── sqlite/
+    └── schema.prisma
+```
+
+## Migrations
+
+Database migrations run automatically on startup. You do not need to run them manually.

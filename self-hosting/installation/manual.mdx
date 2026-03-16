@@ -1,0 +1,141 @@
+---
+title: "Manual installation"
+description: "Install Discord Tickets directly with Node.js without Docker."
+---
+
+This guide covers running Discord Tickets directly on a host machine using Node.js. Use this approach when you prefer not to use Docker or are running on a shared hosting panel.
+
+## Prerequisites
+
+- Node.js 18 or later (LTS is recommended — the project ships a `.nvmrc` set to `lts/*`)
+- npm (included with Node.js)
+- Git
+- A database: MySQL, PostgreSQL, or SQLite
+- A Discord bot token and OAuth2 client secret — see [Create a bot](/getting-started/create-bot)
+
+## Steps
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/discord-tickets/bot.git
+    cd bot
+    ```
+  </Step>
+
+  <Step title="Set environment variables">
+    The `preinstall` script generates a `.env` file automatically if one does not exist. Before running `npm install`, set the `DB_PROVIDER` variable so the installer can copy the correct database schema.
+
+    Create a `.env` file in the project root (or let the preinstall script create one, then edit it):
+
+    ```bash .env
+    DB_PROVIDER=sqlite
+    DB_CONNECTION_URL=
+    DISCORD_SECRET=your_oauth2_client_secret
+    DISCORD_TOKEN=your_bot_token
+    ENCRYPTION_KEY=
+    HTTP_EXTERNAL=http://127.0.0.1:8169
+    HTTP_HOST=0.0.0.0
+    HTTP_PORT=8169
+    HTTP_TRUST_PROXY=false
+    SUPER=your_discord_user_id
+    ```
+
+    For MySQL or PostgreSQL, set `DB_PROVIDER` to `mysql` or `postgresql` and provide a `DB_CONNECTION_URL`:
+
+    ```bash .env
+    DB_PROVIDER=mysql
+    DB_CONNECTION_URL=mysql://user:password@localhost/tickets
+    ```
+
+    <Note>
+      For SQLite, you can leave `DB_CONNECTION_URL` empty. The database file will be created at `./user/database.db`.
+    </Note>
+  </Step>
+
+  <Step title="Generate an encryption key">
+    If you are setting up the `.env` manually before running `npm install`, generate an encryption key first:
+
+    ```bash
+    node scripts/keygen
+    ```
+
+    Copy the printed key and set it as `ENCRYPTION_KEY` in your `.env` file.
+
+    <Warning>
+      The `ENCRYPTION_KEY` must be at least 48 characters. Keep it safe — if you lose it, encrypted data in the database becomes unreadable.
+    </Warning>
+  </Step>
+
+  <Step title="Install dependencies">
+    ```bash
+    npm install
+    ```
+
+    This runs the `preinstall` and `postinstall` scripts automatically. The `postinstall` script:
+
+    - Copies the correct Prisma schema for your `DB_PROVIDER`
+    - Generates the Prisma client
+    - Runs all pending database migrations
+  </Step>
+
+  <Step title="Start the bot">
+    ```bash
+    npm start
+    ```
+
+    The bot loads your `.env`, validates all required environment variables, connects to the database, logs in to Discord, and starts the HTTP server for the dashboard.
+  </Step>
+</Steps>
+
+## Running with a process manager
+
+For production, use a process manager so the bot restarts automatically on failure or server reboot.
+
+<Tabs>
+  <Tab title="PM2">
+    ```bash
+    npm install -g pm2
+    pm2 start npm --name discord-tickets -- start
+    pm2 save
+    pm2 startup
+    ```
+  </Tab>
+  <Tab title="systemd">
+    Create `/etc/systemd/system/discord-tickets.service`:
+
+    ```ini
+    [Unit]
+    Description=Discord Tickets Bot
+    After=network.target
+
+    [Service]
+    Type=simple
+    User=your_user
+    WorkingDirectory=/path/to/bot
+    ExecStart=/usr/bin/node .
+    Restart=on-failure
+    EnvironmentFile=/path/to/bot/.env
+
+    [Install]
+    WantedBy=multi-user.target
+    ```
+
+    ```bash
+    sudo systemctl enable --now discord-tickets
+    ```
+  </Tab>
+</Tabs>
+
+## Node.js version management
+
+The project includes a `.nvmrc` file. If you use nvm:
+
+```bash
+nvm install
+nvm use
+```
+
+## Updating
+
+See the [updating guide](/self-hosting/updating) for how to pull new releases without losing data.

@@ -1,0 +1,50 @@
+---
+title: "Automatic closing"
+description: "How Discord Tickets detects inactive tickets, warns participants, and automatically closes them."
+---
+
+Discord Tickets can monitor ticket channels for inactivity and close them automatically after a configurable period. This keeps your channel list tidy and ensures no tickets are left open indefinitely.
+
+## How it works
+
+The stale ticket handler runs on a regular interval. On each run it checks every open ticket in guilds that have `staleAfter` configured.
+
+<Steps>
+  <Step title="Inactivity detected">
+    If the time since the ticket's last message (or its creation time if no messages have been sent) exceeds the `staleAfter` threshold, the ticket is marked as stale.
+  </Step>
+  <Step title="Warning posted">
+    An embed is posted in the ticket channel with an inactivity warning. A **Close** button is included so any participant can close immediately. The bot pings the appropriate party:
+    - If the last message was from a staff member, the ticket creator is pinged.
+    - If the last message was from the user, the category's ping roles are mentioned.
+  </Step>
+  <Step title="Halfway reminder (if auto-close is set)">
+    If `autoClose` is also configured, a second embed is posted when the halfway point between marking stale and the auto-close deadline is reached, showing a Discord timestamp of when the ticket will be closed.
+  </Step>
+  <Step title="Auto-close triggered">
+    When the `autoClose` deadline passes, the bot calls the standard ticket close function. The channel is deleted, the creator receives a DM, and the event is logged. The close reason is recorded as `inactivity`.
+  </Step>
+</Steps>
+
+## Configuration
+
+| Setting | Description |
+|---|---|
+| `staleAfter` | Duration of inactivity after which a ticket is marked stale and a warning is posted. |
+| `autoClose` | Duration after the stale warning at which the ticket is automatically closed. Set to `null` to warn without auto-closing. |
+
+Both settings are configured per guild in the web dashboard.
+
+<Note>
+`staleAfter` controls when the warning is sent. `autoClose` is the additional wait time after the warning before the channel is deleted. If `autoClose` is not set, tickets are warned but never auto-closed.
+</Note>
+
+## Interaction with the close request flow
+
+When a staff member runs `/close` or clicks the Close button, a close request message is posted. This also registers a stale tracker entry for the ticket. If the `autoClose` duration passes without the user accepting or rejecting, the ticket is closed automatically — even during a pending close confirmation.
+
+If a close request is **rejected**, the stale tracker entry for that ticket is cleared, resetting the inactivity timer.
+
+## Channel deleted externally
+
+If the stale handler tries to fetch the ticket channel and it no longer exists (e.g. it was deleted manually in Discord), the ticket is immediately finalised in the database with the reason `channel deleted`.

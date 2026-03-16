@@ -1,0 +1,68 @@
+---
+title: "Statistics"
+description: "The metrics Discord Tickets tracks for tickets and how they are calculated and surfaced."
+---
+
+Discord Tickets records timing and quality metrics for every ticket. These metrics are available in the web dashboard, surfaced as variables in the opening message template, and included in transcripts.
+
+## Tracked metrics
+
+### First response time
+
+When a staff member sends the first message in a ticket, the timestamp is stored as `firstResponseAt`. The **average response time** is the mean of `(firstResponseAt − createdAt)` across all closed tickets in a set.
+
+### Resolution time
+
+The **average resolution time** is the mean of `(closedAt − createdAt)` across all closed tickets that have a `firstResponseAt` value (i.e. tickets that received at least one staff reply).
+
+### Feedback rating
+
+The **average rating** is the mean of all `feedback.rating` values (1–5) across closed tickets that have feedback. Tickets without a rating are excluded from the calculation.
+
+### Message count
+
+Every message sent in a ticket channel increments a `messageCount` counter per user in the `User` table. The total message count across all users is exposed in the client API stats.
+
+## Where statistics appear
+
+<CardGroup cols={2}>
+  <Card title="Opening message variables" icon="comment">
+    Use `{avgResponseTime}`, `{avgResolutionTime}`, or `{avgRating}` in a category's opening message template to display live stats when a ticket is created. Values are cached per category for one hour.
+  </Card>
+  <Card title="Web dashboard" icon="chart-line">
+    The dashboard shows per-guild and per-category averages: response time, resolution time, rating, and total ticket counts.
+  </Card>
+  <Card title="Transcript" icon="file">
+    The rendered HTML transcript includes the first-response time and the feedback rating and comment for that specific ticket.
+  </Card>
+  <Card title="Close DM" icon="envelope">
+    The DM sent to the ticket creator on close includes the first-response time and the feedback rating.
+  </Card>
+</CardGroup>
+
+## Calculation details
+
+All average calculations are performed in a dedicated worker thread (`stats` pool) to avoid blocking the main event loop.
+
+| Metric | Formula | Unit |
+|---|---|---|
+| `avgResponseTime` | `mean(firstResponseAt − createdAt)` | milliseconds (displayed as human-readable string) |
+| `avgResolutionTime` | `mean(closedAt − createdAt)` | milliseconds (displayed as human-readable string) |
+| `avgRating` | `mean(feedback.rating)` where rating exists | number, displayed to 1 decimal place |
+
+Only tickets with a non-null `firstResponseAt` are included in resolution and response time calculations. This excludes tickets that were closed without ever receiving a staff reply.
+
+## Houston reporting
+
+Once per day the bot reports anonymous aggregated statistics to Houston (the Discord Tickets telemetry service at `stats.discordtickets.app`). The payload includes:
+
+- Per-guild averages for response and resolution time (in minutes)
+- Total ticket counts and enabled feature flags (claiming, feedback, questions, tags, auto-close, working hours)
+- Anonymised guild ID (MD5 hash)
+- Bot version, Node.js version, OS, and database provider
+
+No user-identifiable information is included. Guild IDs are hashed before transmission.
+
+<Note>
+Houston reporting failures are logged as warnings and are non-fatal — the bot continues operating normally if the report cannot be delivered.
+</Note>

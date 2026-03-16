@@ -1,0 +1,102 @@
+---
+title: "Dashboard overview"
+description: "Overview of the Discord Tickets web dashboard and how to access it."
+---
+
+Discord Tickets includes a built-in web dashboard for managing your bot's settings. The dashboard is served by the bot's built-in HTTP server (powered by [Fastify](https://fastify.dev/)) and uses a SvelteKit frontend.
+
+## Accessing the dashboard
+
+The dashboard is available at the URL you set in `HTTP_EXTERNAL`. For example:
+
+```
+https://tickets.example.com
+```
+
+You log in using Discord OAuth2. After authenticating, you are redirected to the guild selector where you can choose which server to manage.
+
+<Note>
+You must be a member of the server you want to manage, and you must have at least the **Manage Guild** Discord permission (privilege level 2) to access the admin settings panel.
+</Note>
+
+## Authentication
+
+<Steps>
+  <Step title="Open the dashboard">
+    Navigate to your `HTTP_EXTERNAL` URL in a browser.
+  </Step>
+  <Step title="Log in with Discord">
+    Click the login button. You will be redirected to Discord's OAuth2 authorization page.
+  </Step>
+  <Step title="Authorize the application">
+    Grant the requested permissions. You will be redirected back to the dashboard.
+  </Step>
+  <Step title="Select your server">
+    The dashboard shows all servers where you are a member and the bot is present. Select a server to view its settings.
+  </Step>
+</Steps>
+
+## Privilege levels and access
+
+What you can do in the dashboard depends on your privilege level in the selected guild:
+
+| Privilege level | Access                                               |
+|-----------------|------------------------------------------------------|
+| OPERATOR (4)    | Full access to all guilds' settings                  |
+| GUILD_OWNER (3) | Full access to their guild's settings                |
+| GUILD_ADMIN (2) | Full access to their guild's settings                |
+| GUILD_STAFF (1) | Can view and manage tickets; cannot change settings  |
+| GUILD_MEMBER (0)| Can view their own tickets only                      |
+
+To grant full admin access to additional users, assign them the **Manage Guild** Discord permission. To grant superuser access across all guilds, add their Discord user ID to the [`SUPER`](/configuration/security#superusers-super) environment variable.
+
+## Dashboard sections
+
+<CardGroup cols={2}>
+  <Card title="Settings" icon="sliders">
+    Guild-level settings including colours, locale, log channel, working hours, and feedback configuration.
+  </Card>
+  <Card title="Categories" icon="folder">
+    Create and manage ticket categories, assign staff roles, configure channel names, and set opening messages.
+  </Card>
+  <Card title="Tags" icon="tag">
+    Create canned responses that staff can send in tickets with a slash command or by matching message patterns.
+  </Card>
+  <Card title="Panels" icon="layout-panel-top">
+    Send embedded ticket creation panels to Discord channels. Supports button, select menu, and message panel types.
+  </Card>
+  <Card title="Tickets" icon="ticket">
+    View and search all tickets for the guild. Staff can manage open tickets from this view.
+  </Card>
+  <Card title="Statistics" icon="chart-bar">
+    Per-guild statistics including average response time, resolution time, and feedback ratings, broken down by category.
+  </Card>
+</CardGroup>
+
+## Reverse proxy configuration
+
+If you serve the dashboard behind a reverse proxy such as nginx or Caddy, set `HTTP_TRUST_PROXY=true` and `HTTP_HOST=0.0.0.0`. Set `HTTP_EXTERNAL` to the public domain and point your proxy to `HTTP_HOST:HTTP_PORT`.
+
+Example nginx configuration:
+
+```nginx nginx.conf
+server {
+    listen 443 ssl;
+    server_name tickets.example.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8169;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+```bash .env
+HTTP_EXTERNAL=https://tickets.example.com
+HTTP_HOST=0.0.0.0
+HTTP_PORT=8169
+HTTP_TRUST_PROXY=true
+```

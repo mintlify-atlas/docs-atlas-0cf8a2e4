@@ -1,0 +1,95 @@
+---
+title: "Closing tickets"
+description: "How tickets are closed — from user-initiated requests and staff force-close through the confirmation and feedback flow."
+---
+
+Tickets are not deleted immediately. Every standard close path goes through a confirmation step so either party can cancel. Force-close bypasses this step and is staff-only.
+
+## User-initiated close
+
+Any member who created the ticket (or any staff member) can request closure with:
+
+- The **Close** button on the opening message, or
+- The `/close` slash command.
+
+```
+/close [reason: <text>]
+```
+
+The optional `reason` text is stored encrypted and included in the close log and the DM sent to the ticket creator.
+
+### Feedback prompt
+
+If the category has **feedback enabled** and the user has not yet submitted a rating for this ticket, a modal appears before the close request is sent:
+
+| Field | Type | Required |
+|---|---|---|
+| Rating | Short text (1–3 chars, e.g. `4` or `4.5`) | Yes |
+| Comment | Paragraph (4–1000 chars) | No |
+
+The rating is validated to be a number between 1 and 5. After the modal is submitted, the close request proceeds.
+
+## Confirmation flow
+
+After a close request is made, a confirmation message is posted in the ticket channel with two buttons:
+
+| Button | Style | Who must click it |
+|---|---|---|
+| Accept | Green (success) | The **other** party — if staff requested close, the user must accept; if the user requested, a staff member must accept |
+| Reject | Red (danger) | The same other party |
+
+<Note>
+If the requesting party is staff, the confirmation message pings the ticket creator. The embed notes that the ticket will be archived if archiving is enabled.
+</Note>
+
+Clicking **Reject** dismisses the request and removes the buttons. The stale tracker entry for this ticket is also cleared.
+
+Clicking **Accept** triggers the final close sequence:
+
+<Steps>
+  <Step title="Success embed posted">
+    A green "ticket closed" embed appears in the channel.
+  </Step>
+  <Step title="3-second delay">
+    The bot waits 3 seconds so participants can read the confirmation before the channel disappears.
+  </Step>
+  <Step title="Channel deleted">
+    The ticket channel is deleted with an audit log reason identifying the closer.
+  </Step>
+  <Step title="DM sent to creator">
+    The ticket creator receives a DM summarising the ticket: category, number, topic, creation time, close time, first-response time, who closed it, the reason, and their feedback rating if provided. If archiving is enabled, a "Get transcript" button is included.
+  </Step>
+  <Step title="Log event emitted">
+    The close event is posted to the guild's log channel with the same summary fields.
+  </Step>
+</Steps>
+
+## Staff force-close
+
+```
+/force-close [ticket: <id>] [category: <id>] [time: <duration>] [reason: <text>]
+```
+
+Staff-only. Skips the confirmation flow and closes ticket(s) immediately. Three modes are available:
+
+<Tabs>
+  <Tab title="Current channel">
+    Run `/force-close` inside a ticket channel with no additional options. Closes that single ticket after a 3-second delay.
+  </Tab>
+  <Tab title="Specific ticket">
+    Pass a ticket ID via the `ticket` option (autocompletes). Closes that ticket regardless of which channel you run the command from.
+  </Tab>
+  <Tab title="Bulk by inactivity">
+    Pass a `time` duration (e.g. `2d`, `1w`) to close all tickets whose last message is older than that duration. Optionally filter to a specific `category`. A confirmation prompt lists the affected tickets before proceeding.
+
+    The confirmation expires after 15 seconds. If it times out, no tickets are closed.
+  </Tab>
+</Tabs>
+
+<Warning>
+Force-close does not trigger the feedback modal or confirmation step. The ticket creator still receives a DM and the event is still logged.
+</Warning>
+
+## Auto-close
+
+Tickets that become inactive are handled by the stale ticket system. See [Automatic closing](/features/automation/auto-close) for details.

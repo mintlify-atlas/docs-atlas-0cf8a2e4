@@ -1,0 +1,84 @@
+---
+title: "/force-close"
+description: "Forcibly close a ticket or bulk-close inactive tickets without requiring approval."
+---
+
+The `/force-close` command lets staff close tickets immediately, bypassing the normal close-request flow. It supports three modes of operation: closing the current channel, closing a specific ticket by ID, or bulk-closing all tickets that have been inactive for a given period.
+
+## Who can use it
+
+Staff members only.
+
+## Options
+
+<ParamField query="ticket" type="string" optional>
+  The specific ticket to close, identified by its channel ID. Supports
+  autocomplete. If provided, that ticket is closed regardless of which channel
+  you run the command from.
+</ParamField>
+
+<ParamField query="time" type="string" optional>
+  Close all tickets that have been inactive for longer than this duration.
+  Accepts human-readable time strings such as `1h`, `2d`, `1w`. When combined
+  with `category`, only tickets in that category are affected.
+</ParamField>
+
+<ParamField query="category" type="integer" optional>
+  Restrict the `time`-based bulk close to a specific ticket category. Must be
+  used together with `time`. Supports autocomplete.
+</ParamField>
+
+<ParamField query="reason" type="string" optional>
+  The reason for closing the ticket(s). Recorded in the close event.
+</ParamField>
+
+## Example usage
+
+Close the current ticket channel:
+```
+/force-close
+```
+
+Close a specific ticket by ID:
+```
+/force-close ticket:1234567890123456789
+```
+
+Bulk-close all tickets inactive for more than 3 days:
+```
+/force-close time:3d
+```
+
+Bulk-close inactive tickets in a specific category:
+```
+/force-close time:1w category:General Support
+```
+
+## What happens after you run it
+
+### Closing a single ticket (`ticket` option or current channel)
+
+1. You receive a confirmation message: *"Ticket closed."*
+2. After a 3-second delay, the bot calls the standard ticket close routine (archiving, DM notification, channel deletion).
+
+### Bulk-close by inactivity (`time` option)
+
+1. The bot finds all open tickets whose last message timestamp is older than the specified duration (optionally filtered to a category).
+2. You receive a confirmation prompt listing all affected tickets and their count. You have **15 seconds** to confirm.
+3. Click **Close** to proceed or **Cancel** to abort.
+4. On confirmation, each ticket is closed sequentially after a 3-second delay.
+
+<Warning>
+  Bulk-closing tickets is irreversible once confirmed. All affected ticket
+  channels will be deleted. Review the list carefully before confirming.
+</Warning>
+
+<Note>
+  If no tickets match the inactivity filter, the bot returns an error rather
+  than showing the confirmation prompt.
+</Note>
+
+<Tip>
+  Use [`/close`](/commands/slash/close) instead when you want to request a
+  close and allow the ticket creator to respond before deletion.
+</Tip>

@@ -1,0 +1,71 @@
+---
+title: "Contributing translations"
+description: "How to add or improve translations for Discord Tickets using Weblate."
+---
+
+Translations for Discord Tickets are managed through [Weblate](https://weblate.org), a web-based translation platform. You do not need to know how to code or use Git to contribute — Weblate provides a browser-based interface for translating strings.
+
+## Getting started
+
+<Steps>
+  <Step title="Create a Weblate account">
+    Go to the Discord Tickets project on Weblate and sign up for an account, or log in with your GitHub account.
+  </Step>
+  <Step title="Choose a language">
+    Browse the list of available components and select the language you want to contribute to. If your language is not listed, you can request it be added.
+  </Step>
+  <Step title="Translate strings">
+    Weblate shows you each source string (in English) alongside the translation input. You can:
+    - Translate untranslated strings
+    - Suggest improvements to existing translations
+    - Mark strings as needing review
+
+    The source strings are in `en-US.yml`.
+  </Step>
+  <Step title="Submit your work">
+    Weblate automatically commits your translations to the repository. A maintainer reviews and merges them. You do not need to open a pull request manually.
+  </Step>
+</Steps>
+
+## Translation file format
+
+Each locale is a single YAML file named after its locale code (e.g. `fr.yml`, `pt-BR.yml`). Strings are organised in a nested structure matching the bot's message categories:
+
+```yaml
+buttons:
+  close:
+    text: Fermer
+  create:
+    text: Créer un ticket
+    emoji: 🎫
+menus:
+  category:
+    placeholder: Sélectionner une catégorie
+```
+
+<Note>
+Do not translate interpolation variables such as `{username}`, `{guild}`, or `{number}`. These are replaced at runtime with actual values.
+</Note>
+
+## Guidelines
+
+- **Accuracy over literalness.** Translate the meaning, not word-for-word.
+- **Consistent terminology.** Use the same term for "ticket", "staff", and "category" throughout.
+- **Preserve formatting.** Keep Discord markdown (bold `**text**`, code backticks) intact where present.
+- **Match the tone.** Bot messages use a neutral, clear tone. Avoid overly casual or overly formal language.
+
+## Adding a new language
+
+If your language is not yet supported:
+
+1. Open a GitHub issue on the [discord-tickets/bot](https://github.com/discord-tickets/bot) repository requesting the new locale.
+2. A maintainer will create the locale file and add it to Weblate.
+3. You can then begin translating through the Weblate interface.
+
+Alternatively, you can submit a pull request directly adding a new YAML file to `src/i18n/` modelled on `en-US.yml`.
+
+## Keeping translations up to date
+
+When new features are added, new source strings appear as untranslated in Weblate. You can watch the project on Weblate or subscribe to notifications to be informed when new strings need translating.
+
+The CHANGELOG includes entries tagged with `i18n` whenever translation files are updated. See [Changelog](/reference/changelog) to track recent updates.

@@ -1,0 +1,55 @@
+---
+title: "Tags"
+description: "Create reusable canned responses that staff can send with a single slash command."
+---
+
+Tags (also called canned responses) let staff reply to common questions instantly without retyping the same information. Each tag stores a block of formatted text that is rendered into an embed when sent.
+
+## Sending a tag
+
+```
+/tag tag: <name> [for: <@user>]
+```
+
+| Parameter | Required | Description |
+|---|---|---|
+| `tag` | Yes | The tag to send. Autocompletes from all tags configured for this guild. |
+| `for` | No | A user to mention at the start of the message. |
+
+**Without `for`:** the response is ephemeral — only the staff member who ran the command can see it (useful for quickly checking tag content).
+
+**With `for`:** the response is posted publicly in the channel and mentions the specified user. The bot sends a `content` field containing the user mention and an embed containing the tag text.
+
+<Note>
+The `tag` parameter is an integer ID resolved internally. Autocomplete surfaces the tag by its human-readable name.
+</Note>
+
+## Tag content
+
+Tag content is stored as plain text and rendered into an embed description. The text can include any Discord markdown — bold, italics, code blocks, hyperlinks, and so on.
+
+## Managing tags
+
+Tags are created, edited, and deleted from the **Settings panel** in the web dashboard (not via Discord commands). Each tag belongs to a single guild.
+
+## Example workflow
+
+<Steps>
+  <Step title="User asks a common question">
+    A user asks how to reset their password in a support ticket.
+  </Step>
+  <Step title="Staff types the tag command">
+    The staff member types `/tag tag:` and selects the `password-reset` tag from autocomplete, then sets `for:` to the user.
+  </Step>
+  <Step title="Response is posted">
+    The bot posts a message that mentions the user and displays the full password-reset instructions in an embed.
+  </Step>
+</Steps>
+
+## Regex tags
+
+Tags can optionally have a `regex` pattern. When a regex is configured, the bot can automatically trigger the tag when a message in a ticket matches that pattern. This allows common questions to be answered proactively without staff intervention.
+
+<Tip>
+Use regex tags sparingly and test patterns carefully. An overly broad pattern can cause the bot to send canned responses to messages that don't need them.
+</Tip>

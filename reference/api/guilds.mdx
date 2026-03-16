@@ -1,0 +1,395 @@
+---
+title: "Guilds"
+description: "API endpoints for listing guilds, retrieving guild details, managing settings, categories, tags, and panels."
+---
+
+## List guilds (member view)
+
+`GET /api/guilds`
+
+Returns all guilds that both the authenticated user and the bot are members of.
+
+**Authentication:** required (`authenticate`)
+
+### Response
+
+<ResponseField name="[]" type="array">
+  Array of guild objects.
+  <Expandable title="Guild object">
+    <ResponseField name="id" type="string">Discord guild (server) ID.</ResponseField>
+    <ResponseField name="name" type="string">Guild display name.</ResponseField>
+    <ResponseField name="logo" type="string">Guild icon URL, or `null`.</ResponseField>
+    <ResponseField name="privilegeLevel" type="number">The authenticated user's privilege level in this guild. `0` = member, `1` = staff, `2` = admin.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## Get a guild (member view)
+
+`GET /api/guilds/:guild`
+
+Returns basic information about a single guild.
+
+**Authentication:** required (`authenticate`, `isMember`)
+
+### Path parameters
+
+<ParamField path="guild" type="string" required>
+  Discord guild ID.
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">Guild ID.</ResponseField>
+<ResponseField name="name" type="string">Guild display name.</ResponseField>
+<ResponseField name="logo" type="string">Guild icon URL, or `null`.</ResponseField>
+<ResponseField name="privilegeLevel" type="number">The authenticated user's privilege level. `0` = member, `1` = staff, `2` = admin.</ResponseField>
+
+---
+
+## List guilds (admin view)
+
+`GET /api/admin/guilds`
+
+Returns all guilds the authenticated user owns or has the Manage Server permission in, and indicates whether the bot is already present in each.
+
+**Authentication:** required (`authenticate`)
+
+### Response
+
+<ResponseField name="[]" type="array">
+  <Expandable title="Admin guild object">
+    <ResponseField name="id" type="string">Guild ID.</ResponseField>
+    <ResponseField name="name" type="string">Guild name.</ResponseField>
+    <ResponseField name="logo" type="string">Guild icon URL, or `null`.</ResponseField>
+    <ResponseField name="added" type="boolean">Whether the bot is a member of this guild.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## Get a guild (admin view)
+
+`GET /api/admin/guilds/:guild`
+
+Returns detailed guild information including ticket statistics per category. Cached for 5 minutes.
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Path parameters
+
+<ParamField path="guild" type="string" required>
+  Discord guild ID.
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">Guild ID.</ResponseField>
+<ResponseField name="name" type="string">Guild name.</ResponseField>
+<ResponseField name="logo" type="string">Guild icon URL.</ResponseField>
+<ResponseField name="createdAt" type="string">ISO 8601 timestamp of when the guild was first registered.</ResponseField>
+<ResponseField name="stats" type="object">
+  <Expandable title="Stats object">
+    <ResponseField name="tickets" type="number">Total ticket count.</ResponseField>
+    <ResponseField name="tags" type="number">Number of tags.</ResponseField>
+    <ResponseField name="avgRating" type="string">Average feedback rating, formatted to one decimal place.</ResponseField>
+    <ResponseField name="avgResponseTime" type="string">Average first-response time as a human-readable string (e.g. `"2h"`).</ResponseField>
+    <ResponseField name="avgResolutionTime" type="string">Average ticket resolution time as a human-readable string.</ResponseField>
+    <ResponseField name="categories" type="array">
+      Per-category summary.
+      <Expandable title="Category summary">
+        <ResponseField name="id" type="number">Category ID.</ResponseField>
+        <ResponseField name="name" type="string">Category name.</ResponseField>
+        <ResponseField name="tickets" type="number">Total ticket count for this category.</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## Reset guild settings
+
+`DELETE /api/admin/guilds/:guild`
+
+Deletes and recreates the guild's database record, resetting all settings to defaults.
+
+<Warning>
+This is irreversible. All settings, categories, and tags for the guild will be permanently deleted.
+</Warning>
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Path parameters
+
+<ParamField path="guild" type="string" required>
+  Discord guild ID.
+</ParamField>
+
+### Response
+
+Returns `true` on success.
+
+---
+
+## Get guild settings
+
+`GET /api/admin/guilds/:guild/settings`
+
+Returns the guild's current settings record from the database.
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Path parameters
+
+<ParamField path="guild" type="string" required>
+  Discord guild ID.
+</ParamField>
+
+---
+
+## Update guild settings
+
+`PATCH /api/admin/guilds/:guild/settings`
+
+Partially updates the guild's settings. Send only the fields you want to change.
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Path parameters
+
+<ParamField path="guild" type="string" required>
+  Discord guild ID.
+</ParamField>
+
+### Request body
+
+Any writable field from the `Guild` model. The `id` and `createdAt` fields are ignored if included. Colour fields (`errorColour`, `primaryColour`, `successColour`) must be a CSS hex string (e.g. `"#5865F2"`) or a named Discord.js colour (e.g. `"Blurple"`).
+
+---
+
+## Get guild data
+
+`GET /api/admin/guilds/:guild/data`
+
+Queries a dot-notation path on the live Discord.js guild object. Useful for reading channel lists, role lists, or other live guild data.
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Query parameters
+
+<ParamField query="query" type="string">
+  Dot-notation path into the guild object, e.g. `channels.cache`.
+</ParamField>
+
+---
+
+## Get guild problems
+
+`GET /api/admin/guilds/:guild/problems`
+
+Returns a list of detected configuration problems for the guild.
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Response
+
+<ResponseField name="[]" type="array">
+  <Expandable title="Problem object">
+    <ResponseField name="id" type="string">Problem identifier (e.g. `logChannelMissingPermission`, `botPublic`).</ResponseField>
+    <ResponseField name="permission" type="string">The missing permission name, if applicable.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## List categories
+
+`GET /api/admin/guilds/:guild/categories`
+
+Returns all ticket categories for the guild, including per-category statistics.
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Path parameters
+
+<ParamField path="guild" type="string" required>
+  Discord guild ID.
+</ParamField>
+
+### Response
+
+Array of category objects. Each includes `id`, `name`, `description`, `emoji`, `discordCategory`, `image`, `requiredRoles`, `staffRoles`, and a `stats` object with `avgRating`, `avgResponseTime`, and `avgResolutionTime`.
+
+---
+
+## Create a category
+
+`POST /api/admin/guilds/:guild/categories`
+
+Creates a new ticket category. If `discordCategory` is not provided, a new Discord category channel is created automatically.
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Path parameters
+
+<ParamField path="guild" type="string" required>
+  Discord guild ID.
+</ParamField>
+
+### Request body
+
+<ParamField body="name" type="string" required>
+  Category display name.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Short description shown in the ticket creation menu.
+</ParamField>
+
+<ParamField body="emoji" type="string">
+  Emoji name or Discord snowflake ID.
+</ParamField>
+
+<ParamField body="staffRoles" type="string[]" required>
+  Array of Discord role IDs that have staff access to tickets in this category.
+</ParamField>
+
+<ParamField body="discordCategory" type="string">
+  Discord category channel ID to place ticket channels under. If omitted, a new category is created.
+</ParamField>
+
+<ParamField body="questions" type="object[]">
+  Pre-open questions presented to users in a modal.
+</ParamField>
+
+---
+
+## Get a category
+
+`GET /api/admin/guilds/:guild/categories/:category`
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Path parameters
+
+<ParamField path="guild" type="string" required>Discord guild ID.</ParamField>
+<ParamField path="category" type="number" required>Category ID.</ParamField>
+
+---
+
+## Update a category
+
+`PATCH /api/admin/guilds/:guild/categories/:category`
+
+Partially updates a category. Sends only changed fields.
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Path parameters
+
+<ParamField path="guild" type="string" required>Discord guild ID.</ParamField>
+<ParamField path="category" type="number" required>Category ID.</ParamField>
+
+---
+
+## Delete a category
+
+`DELETE /api/admin/guilds/:guild/categories/:category`
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Path parameters
+
+<ParamField path="guild" type="string" required>Discord guild ID.</ParamField>
+<ParamField path="category" type="number" required>Category ID.</ParamField>
+
+---
+
+## List tags
+
+`GET /api/admin/guilds/:guild/tags`
+
+Returns all auto-response tags for the guild.
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Response
+
+Array of tag objects, each with `id`, `name`, `content`, and `regex`.
+
+---
+
+## Create a tag
+
+`POST /api/admin/guilds/:guild/tags`
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Request body
+
+<ParamField body="name" type="string" required>Tag name (used as a command name).</ParamField>
+<ParamField body="content" type="string" required>Tag response content.</ParamField>
+<ParamField body="regex" type="string">Optional regex pattern that triggers the tag automatically.</ParamField>
+
+---
+
+## Send a panel
+
+`POST /api/admin/guilds/:guild/panels`
+
+Sends a ticket creation panel embed to a Discord channel.
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Request body
+
+<ParamField body="type" type="string" required>
+  Panel type: `MESSAGE`, `BUTTON`, or `MENU`.
+</ParamField>
+
+<ParamField body="categories" type="string[]" required>
+  Array of category IDs to include. `MESSAGE` type must have exactly one.
+</ParamField>
+
+<ParamField body="channel" type="string">
+  Discord channel ID to send the panel to. If omitted, a new `#create-a-ticket` channel is created.
+</ParamField>
+
+<ParamField body="title" type="string">Embed title.</ParamField>
+<ParamField body="description" type="string">Embed description.</ParamField>
+<ParamField body="image" type="string">URL for the embed image.</ParamField>
+<ParamField body="thumbnail" type="string">URL for the embed thumbnail.</ParamField>
+
+---
+
+## Export guild data
+
+`GET /api/admin/guilds/:guild/export`
+
+Streams a ZIP archive containing the guild's settings (`settings.json`) and all ticket data (`tickets.jsonl`). Only one export can run per guild at a time.
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Response
+
+Streams a ZIP file with `Content-Type: application/zip`.
+
+---
+
+## Import guild data
+
+`POST /api/admin/guilds/:guild/import`
+
+Imports a ZIP archive previously exported by the export endpoint. Streams progress as HTML.
+
+<Warning>
+Importing will overwrite all existing settings, categories, tags, and tickets for the guild.
+</Warning>
+
+**Authentication:** required (`authenticate`, `isAdmin`)
+
+### Request body
+
+Multipart form upload containing the ZIP file.

@@ -1,0 +1,43 @@
+---
+title: "/rename"
+description: "Rename the current ticket's channel."
+---
+
+The `/rename` command changes the Discord channel name of the current ticket channel to a custom value you supply.
+
+## Who can use it
+
+- **Ticket creator** — can rename their own ticket channel.
+- **Staff members** — can rename any ticket channel.
+
+## Options
+
+<ParamField query="name" type="string" required>
+  The new name for the ticket channel. Must be between 1 and 100 characters.
+</ParamField>
+
+## Example usage
+
+```
+/rename name:billing-issue-refund
+```
+
+## What happens after you run it
+
+1. The bot validates that the name is between 1 and 100 characters.
+2. A rate-limit check runs: the bot allows a maximum of **2 renames per 10 minutes** per channel.
+3. If the checks pass, the channel is renamed.
+4. You receive an ephemeral confirmation: *"The ticket channel has been renamed to `name`."*
+
+The old and new names are logged to the configured log channel.
+
+<Warning>
+  Discord enforces its own rate limit on channel renames. The bot adds an
+  additional layer: if you rename the channel twice within 10 minutes, further
+  attempts are blocked until the window expires.
+</Warning>
+
+<Note>
+  The `/rename` command only works inside a ticket channel. Using it in a
+  non-ticket channel returns an error.
+</Note>

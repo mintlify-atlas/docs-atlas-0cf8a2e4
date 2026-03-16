@@ -1,0 +1,91 @@
+---
+title: "Create a Discord bot"
+description: "Register a Discord application and get a bot token from the Developer Portal."
+---
+
+Before you can run Discord Tickets, you need to register a Discord application and create a bot user. This gives you the bot token and OAuth2 credentials the bot needs.
+
+## Steps
+
+<Steps>
+  <Step title="Open the Discord Developer Portal">
+    Go to [discord.com/developers/applications](https://discord.com/developers/applications) and sign in with your Discord account.
+  </Step>
+
+  <Step title="Create a new application">
+    Click **New Application** in the top-right corner. Give it a name (this is your bot's display name) and click **Create**.
+  </Step>
+
+  <Step title="Configure the application">
+    On the **General Information** page you can set:
+
+    - **Name** — shown in the Discord UI
+    - **Description** — shown on the bot's profile
+    - **App Icon** — the bot's avatar
+
+    Take note of the **Application ID** on this page — you will need it to build the invite URL.
+  </Step>
+
+  <Step title="Create the bot user">
+    In the left sidebar, click **Bot**.
+
+    Click **Add Bot**, then confirm. A bot user is now attached to your application.
+
+    <Warning>
+      Do not share your bot token. Anyone with the token has full control over your bot. If it is ever exposed, reset it immediately using the **Reset Token** button.
+    </Warning>
+  </Step>
+
+  <Step title="Copy the bot token">
+    Under the bot's username, click **Reset Token** (or **Copy** if shown) to reveal the token. Copy it and store it securely — you will set it as `DISCORD_TOKEN` in your environment.
+
+    <Note>
+      You only see the token once. If you navigate away before copying it, you must reset it to get a new one.
+    </Note>
+  </Step>
+
+  <Step title="Enable required intents">
+    On the **Bot** page, scroll down to **Privileged Gateway Intents** and enable:
+
+    - **Server Members Intent** — required to look up member information
+    - **Message Content Intent** — required for tag matching and reading ticket messages
+
+    Click **Save Changes**.
+  </Step>
+
+  <Step title="Get the OAuth2 credentials">
+    In the left sidebar, click **OAuth2**.
+
+    Copy the **Client ID** (same as the Application ID) and the **Client Secret**. Store the Client Secret securely — you will set it as `DISCORD_SECRET` in your environment.
+
+    Add a redirect URL under **Redirects**. The redirect URL is your `HTTP_EXTERNAL` value followed by `/auth/callback`. For example:
+
+    ```
+    https://tickets.example.com/auth/callback
+    ```
+
+    Click **Save Changes**.
+  </Step>
+</Steps>
+
+## What you need from this step
+
+After completing the steps above, you should have:
+
+| Value | Environment variable |
+|---|---|
+| Bot token | `DISCORD_TOKEN` |
+| OAuth2 client secret | `DISCORD_SECRET` |
+
+You will use these in the [configuration](/self-hosting/configuration) step.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Install with Docker" icon="docker" href="/self-hosting/installation/docker">
+    Deploy the bot using Docker Compose.
+  </Card>
+  <Card title="Manual installation" icon="terminal" href="/self-hosting/installation/manual">
+    Install the bot directly with Node.js.
+  </Card>
+</CardGroup>

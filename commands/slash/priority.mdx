@@ -1,0 +1,47 @@
+---
+title: "/priority"
+description: "Set the priority level of the current ticket."
+---
+
+The `/priority` command assigns a priority level to the current ticket. The priority is displayed as a coloured emoji prefix on the ticket channel name, giving staff an at-a-glance indicator of urgency.
+
+## Who can use it
+
+Staff members only.
+
+## Options
+
+<ParamField query="priority" type="string" required>
+  The priority level to assign. One of:
+
+  | Value | Display |
+  |-------|---------|
+  | `HIGH` | 🔴 High |
+  | `MEDIUM` | 🟠 Medium |
+  | `LOW` | 🟢 Low |
+</ParamField>
+
+## Example usage
+
+```
+/priority priority:HIGH
+```
+
+```
+/priority priority:LOW
+```
+
+## What happens after you run it
+
+1. The ticket's `priority` field is updated in the database.
+2. The channel name is updated: if the ticket already had a priority emoji, it is replaced; otherwise, the emoji is prepended to the current name.
+   - `🔴` for HIGH
+   - `🟠` for MEDIUM
+   - `🟢` for LOW
+3. The priority change is logged to the configured log channel (showing the old and new values).
+4. You receive a confirmation: *"This ticket's priority has been set to `{priority}`."*
+
+<Note>
+  The `/priority` command only works inside a ticket channel. Running it in a
+  non-ticket channel returns an error.
+</Note>

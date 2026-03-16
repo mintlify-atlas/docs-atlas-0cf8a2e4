@@ -1,0 +1,35 @@
+---
+title: "/release"
+description: "Release (unclaim) a ticket so another staff member can take it."
+---
+
+The `/release` command removes the claim on the current ticket, making it available for other staff members to claim.
+
+## Who can use it
+
+Staff members only.
+
+## Options
+
+This command has no options.
+
+## Example usage
+
+```
+/release
+```
+
+## What happens after you run it
+
+- The claim assignment is removed from the ticket.
+- A message is posted in the ticket channel: *"@You has released this ticket."*
+- The ticket returns to the general staff pool.
+
+<Note>
+  You must run `/release` from inside the ticket channel you want to unclaim.
+</Note>
+
+<Tip>
+  Use [`/claim`](/commands/slash/claim) to reassign the ticket to yourself or
+  ask another staff member to claim it after releasing.
+</Tip>

@@ -1,0 +1,47 @@
+---
+title: "/add"
+description: "Add a server member to a ticket channel."
+---
+
+The `/add` command grants a member access to a ticket they are not currently part of. The member receives permissions to view the channel, read its history, and send messages.
+
+## Who can use it
+
+- **Ticket creator** — can add members to their own ticket.
+- **Staff members** — can add members to any ticket.
+
+Non-staff members cannot add users to tickets they did not create.
+
+## Options
+
+<ParamField query="member" type="user" required>
+  The server member to add to the ticket.
+</ParamField>
+
+<ParamField query="ticket" type="string" optional>
+  The ticket to add the member to. Defaults to the current channel if not
+  specified. Supports autocomplete.
+</ParamField>
+
+## Example usage
+
+```
+/add member:@Alice
+```
+
+```
+/add member:@Alice ticket:abc123
+```
+
+## What happens after you run it
+
+1. The bot updates the channel's permission overwrites to grant the member access (`ViewChannel`, `SendMessages`, `ReadMessageHistory`, `EmbedLinks`, `AttachFiles`).
+2. A message is posted in the ticket channel announcing that the member was added.
+3. You receive an ephemeral confirmation message.
+
+The event is also logged to the configured log channel.
+
+<Note>
+  The `ticket` option is useful when you want to add someone to a ticket from
+  outside that channel (for example, from a different channel or DMs).
+</Note>

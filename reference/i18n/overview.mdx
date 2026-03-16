@@ -1,0 +1,67 @@
+---
+title: "Internationalisation overview"
+description: "Available languages and how the Discord Tickets bot handles localisation."
+---
+
+Discord Tickets is fully internationalised. All bot messages, button labels, command descriptions, and modal prompts are loaded from YAML locale files at startup. The bot selects the appropriate locale for each guild based on the guild's configured language setting.
+
+## Available languages
+
+The following 28 locales are currently included:
+
+<CardGroup cols={3}>
+  <Card title="Bulgarian" icon="globe">`bg`</Card>
+  <Card title="Czech" icon="globe">`cs`</Card>
+  <Card title="Danish" icon="globe">`da`</Card>
+  <Card title="German" icon="globe">`de`</Card>
+  <Card title="Greek" icon="globe">`el`</Card>
+  <Card title="English (UK)" icon="globe">`en-GB`</Card>
+  <Card title="English (US)" icon="globe">`en-US`</Card>
+  <Card title="Spanish (Spain)" icon="globe">`es-ES`</Card>
+  <Card title="Finnish" icon="globe">`fi`</Card>
+  <Card title="French" icon="globe">`fr`</Card>
+  <Card title="Hungarian" icon="globe">`hu`</Card>
+  <Card title="Italian" icon="globe">`it`</Card>
+  <Card title="Japanese" icon="globe">`ja`</Card>
+  <Card title="Korean" icon="globe">`ko`</Card>
+  <Card title="Lithuanian" icon="globe">`lt`</Card>
+  <Card title="Dutch" icon="globe">`nl`</Card>
+  <Card title="Norwegian" icon="globe">`no`</Card>
+  <Card title="Polish" icon="globe">`pl`</Card>
+  <Card title="Portuguese (Brazil)" icon="globe">`pt-BR`</Card>
+  <Card title="Romanian" icon="globe">`ro`</Card>
+  <Card title="Russian" icon="globe">`ru`</Card>
+  <Card title="Swedish" icon="globe">`sv-SE`</Card>
+  <Card title="Thai" icon="globe">`th`</Card>
+  <Card title="Turkish" icon="globe">`tr`</Card>
+  <Card title="Ukrainian" icon="globe">`uk`</Card>
+  <Card title="Vietnamese" icon="globe">`vi`</Card>
+  <Card title="Chinese (Simplified)" icon="globe">`zh-CN`</Card>
+  <Card title="Chinese (Traditional)" icon="globe">`zh-TW`</Card>
+</CardGroup>
+
+## How locales are loaded
+
+Locale files live in `src/i18n/` as YAML files named after their locale code (e.g. `fr.yml`, `zh-CN.yml`). The bot loads all files in this directory at startup and makes them available through `client.i18n`.
+
+The `/api/locales` endpoint exposes the list of available locales to the web dashboard:
+
+```
+GET /api/locales
+```
+
+This allows the settings UI to populate the language selector dynamically based on what is actually available at runtime.
+
+## Setting a guild language
+
+Each guild can independently set its locale via the settings dashboard or the `PATCH /api/admin/guilds/:guild/settings` endpoint. The `locale` field accepts any locale code from the list above.
+
+Once set, all bot-generated messages in that guild — including ticket open messages, button labels, modal titles, and slash command descriptions — use that locale.
+
+## Fallback behaviour
+
+If a translation key is missing in a locale file, the bot falls back to `en-US`. This ensures that partially-translated locales do not cause errors.
+
+## Contributing translations
+
+Translations are managed on Weblate. See [Contributing translations](/reference/i18n/contributing) for instructions.

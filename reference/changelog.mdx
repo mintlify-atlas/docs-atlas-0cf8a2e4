@@ -1,0 +1,143 @@
+---
+title: "Changelog"
+description: "Recent changes and release highlights for Discord Tickets."
+---
+
+This page summarises notable recent releases. For the full commit-level history, see the [CHANGELOG.md](https://github.com/discord-tickets/bot/blob/main/CHANGELOG.md) on GitHub.
+
+<Update label="2026-03-02" description="v4.0.50" tags={["Security", "Bug Fix", "i18n"]}>
+
+## Security
+
+- Fixed a vulnerability that allowed closing tickets belonging to other guilds.
+
+## Bug fixes
+
+- Tags are now sorted by longest regex first, preventing shorter patterns from matching prematurely.
+
+## Translations updated
+
+- Chinese (Simplified)
+- English (US)
+- French
+- Russian
+
+</Update>
+
+<Update label="2025-11-27" description="v4.0.49" tags={["Bug Fix", "i18n"]}>
+
+## Bug fixes
+
+- Changed the stale ticket message threshold from 5 messages to 1 message. A ticket is now considered stale if there has been no activity after a single message, rather than five.
+
+## Translations updated
+
+- Dutch
+- English (US)
+
+</Update>
+
+<Update label="2025-10-23" description="v4.0.48" tags={["Feature", "i18n"]}>
+
+## New features
+
+- Added optional [Sentry](https://sentry.io) error tracking integration. Set `SENTRY_DSN` to enable it.
+- Added list and get ticket API routes (`GET /api/admin/guilds/:guild/tickets` and `GET /api/admin/guilds/:guild/tickets/:ticket`).
+
+## Translations updated
+
+- English (US)
+- French
+- Japanese
+- Russian
+- Ukrainian
+
+</Update>
+
+<Update label="2025-07-25" description="v4.0.46" tags={["Bug Fix"]}>
+
+## Bug fixes
+
+- Fixed staff offline messages not displaying in ticket channels.
+
+</Update>
+
+<Update label="2025-07-24" description="v4.0.45" tags={["Feature", "Performance"]}>
+
+## New features
+
+- Added `CPU_LIMIT` environment variable to control the number of CPU threads used by worker pools.
+- Added average feedback rating stat to the client stats endpoint.
+- Export handling rewritten for improved performance; Sentry support added to the export flow.
+
+## Translations updated
+
+- Danish
+- German
+- Russian
+
+</Update>
+
+<Update label="2025-06-30" description="v4.0.41" tags={["Feature"]}>
+
+## New features
+
+- Added `DISABLE_ENCRYPTION` option for deployments that manage encryption at the database layer.
+- Added Ukrainian translations.
+- Shared thread pools for improved resource efficiency across worker operations.
+
+</Update>
+
+<Update label="2025-05-23" description="v4.0.39" tags={["Feature"]}>
+
+## New features
+
+- Timed-out users are now blocked from opening new tickets.
+- Added Japanese translations.
+- Panel title is now optional.
+
+</Update>
+
+<Update label="2025-03-26" description="v4.0.37" tags={["Feature"]}>
+
+## New features
+
+- Added Vietnamese translations.
+
+## Bug fixes
+
+- Fixed importing tickets that include feedback records.
+
+</Update>
+
+<Update label="2025-03-05" description="v4.0.34" tags={["Feature", "Bug Fix"]}>
+
+## New features
+
+- Detailed ticket close log messages with full context.
+- Question answers are now included in ticket transcripts.
+- Users can now use a "create ticket" button sent for a specific user, if the category allows it.
+- Shorter maximum topic length (100 characters).
+
+## Bug fixes
+
+- Fixed service API keys.
+- Fixed panel emoji error handling with improved human-readable error messages.
+- Fixed duplicate reason in close log.
+- Fixed feedback comment decryption in close log.
+- Fixed the `user/create` command when only one category exists.
+
+## Translations updated
+
+- French
+- German
+
+</Update>
+
+<Update label="2025-02-15" description="v4.0.32" tags={["Feature"]}>
+
+## New features
+
+- Question answers are now included in ticket transcripts.
+
+</Update>

@@ -1,0 +1,110 @@
+---
+title: "Authentication"
+description: "How to authenticate with the Discord Tickets API using OAuth2 cookies or service API keys."
+---
+
+The Discord Tickets API uses JWT tokens stored in `HttpOnly` cookies. There are two ways to obtain a valid token: the interactive OAuth2 browser flow and programmatic service API keys.
+
+## OAuth2 browser flow
+
+This is the standard method used by the web dashboard.
+
+<Steps>
+  <Step title="Redirect the user to the login endpoint">
+    Send the user's browser to `GET /auth/login`. Include an optional `r` query parameter to redirect back to a specific page after login.
+
+    ```
+    GET /auth/login?r=/settings/123456789012345678
+    ```
+
+    The server generates a random CSRF state, stores it in a short-lived `oauth2-state` cookie, then redirects the browser to Discord's OAuth2 authorization page.
+
+    The OAuth2 scopes requested are `identify` and `guilds`. When using the admin flow (`?role=admin`), the `applications.commands.permissions.update` scope is added. When inviting the bot, the `bot` and `applications.commands` scopes are added as well.
+  </Step>
+  <Step title="Discord redirects to the callback">
+    After the user authorises the application on Discord, Discord redirects to `GET /auth/callback` with a `code` and `state` parameter.
+
+    The server validates the `state` against the cookie, exchanges the `code` for an access token via Discord's token endpoint, fetches the user's profile, and signs a JWT containing:
+
+    - `id` — Discord user ID
+    - `username` — Discord username
+    - `avatar` — Avatar hash
+    - `locale` — User's Discord locale
+    - `accessToken` — Discord OAuth2 access token
+    - `expiresAt` — Token expiry timestamp (milliseconds)
+    - `scopes` — Array of granted OAuth2 scopes
+  </Step>
+  <Step title="The token cookie is set">
+    The signed JWT is written to a `token` cookie with the following attributes:
+
+    - `HttpOnly` — Not accessible from JavaScript
+    - `SameSite=Strict` — Not sent on cross-site requests
+    - `Path=/`
+    - `maxAge` — Matches the Discord access token TTL
+
+    All subsequent API requests from the browser include this cookie automatically.
+  </Step>
+</Steps>
+
+## Token validation
+
+On every protected request, the server verifies the JWT signature and checks two conditions:
+
+1. `expiresAt` must be in the future.
+2. `createdAt` must be after the `INVALIDATE_TOKENS` environment variable timestamp.
+
+If either check fails, the server returns `401 Unauthorised` with the message `Your token has expired; please re-authenticate.`
+
+## Service API keys
+
+If you are building a server-side integration and cannot use the browser flow, you can generate a long-lived API key.
+
+<Warning>
+API keys are not available when the bot is running in public bot mode (`PUBLIC_BOT=true`). Requests to the key endpoint will return `400 Bad Request`.
+</Warning>
+
+To generate an API key, you must first authenticate with the browser flow, then call:
+
+```
+GET /api/users/@me/key
+```
+
+The response contains a JWT signed with the `service: true` claim:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+Pass this token in the `token` cookie on API requests:
+
+```bash
+curl https://tickets.example.com/api/users/@me \
+  -H "Cookie: token=<your-api-key>"
+```
+
+<Note>
+Service tokens do not carry an `expiresAt` field and do not expire due to Discord token TTL. They are still invalidated if the `INVALIDATE_TOKENS` environment variable is updated.
+</Note>
+
+## Admin scope requirement
+
+Endpoints under `/api/admin/` require additional Discord OAuth2 scopes. Specifically, the `applications.commands.permissions.update` scope must be present in the token's `scopes` array, unless the token was issued as a service key (`service: true`).
+
+If the scope is missing, the server returns:
+
+```json
+{
+  "statusCode": 401,
+  "error": "Unauthorised",
+  "message": "Extra scopes required; reauthenticate.",
+  "elevate": "admin"
+}
+```
+
+The dashboard handles this automatically by redirecting to `GET /auth/login?role=admin`.
+
+## Logout
+
+To end a session, send the user to `GET /auth/logout`. This clears the `token` cookie.

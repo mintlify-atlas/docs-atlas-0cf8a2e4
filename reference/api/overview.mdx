@@ -1,0 +1,80 @@
+---
+title: "API overview"
+description: "Base URL, authentication overview, and response format for the Discord Tickets REST API."
+---
+
+Discord Tickets exposes a REST API that powers the web settings dashboard. You can also use it to build integrations, automate workflows, or query ticket data programmatically.
+
+## Base URL
+
+The API is served from the same host as the web dashboard, under the `/api` prefix:
+
+```
+http(s)://<your-host>/api
+```
+
+For example, if your dashboard is at `https://tickets.example.com`, the API base URL is `https://tickets.example.com/api`.
+
+## Authentication
+
+All protected endpoints require a valid JWT passed as an `HttpOnly` cookie named `token`. You obtain this cookie by completing the OAuth2 login flow. Some service integrations can use a long-lived API key instead.
+
+See [Authentication](/reference/api/authentication) for the full details.
+
+## Response format
+
+All responses are JSON unless otherwise noted. Successful responses return the resource directly (object or array). There is no wrapper envelope.
+
+```json
+// Single resource
+{
+  "id": "123456789012345678",
+  "name": "My Server"
+}
+
+// Collection
+[
+  { "id": "123456789012345678", "name": "My Server" },
+  { "id": "987654321098765432", "name": "Another Server" }
+]
+```
+
+## Error responses
+
+Errors follow a consistent shape:
+
+```json
+{
+  "statusCode": 401,
+  "error": "Unauthorised",
+  "message": "You are not authenticated."
+}
+```
+
+| Status code | Meaning |
+|-------------|--------------------------------------------|
+| `400` | Bad request — invalid input or parameters |
+| `401` | Unauthenticated or expired token |
+| `403` | Authenticated but not authorised |
+| `404` | Resource not found |
+| `429` | Rate limited |
+| `451` | Guild banned for ToS violations |
+| `500` | Internal server error |
+
+## Endpoints
+
+<CardGroup cols={3}>
+  <Card title="Guilds" icon="server" href="/reference/api/guilds">
+    List guilds, retrieve guild details and stats.
+  </Card>
+  <Card title="Tickets" icon="ticket" href="/reference/api/tickets">
+    Query and manage tickets within a guild.
+  </Card>
+  <Card title="Users" icon="user" href="/reference/api/users">
+    Retrieve the current user profile and generate API keys.
+  </Card>
+</CardGroup>
+
+## Caching
+
+Some endpoints cache their responses in memory. The cache duration is noted per endpoint where applicable. Cached data is invalidated automatically when the underlying resource changes.

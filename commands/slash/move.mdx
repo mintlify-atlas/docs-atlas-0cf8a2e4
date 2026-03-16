@@ -1,0 +1,40 @@
+---
+title: "/move"
+description: "Move the current ticket to a different category."
+---
+
+The `/move` command transfers the current ticket channel into a different configured ticket category. The channel's parent Discord category, name template, and staff role permissions are all updated to match the destination category.
+
+## Who can use it
+
+Staff members only.
+
+## Options
+
+<ParamField query="category" type="integer" required>
+  The ticket category to move the ticket into. Supports autocomplete — the list
+  shows all configured categories.
+</ParamField>
+
+## Example usage
+
+```
+/move category:Billing
+```
+
+## What happens after you run it
+
+1. The ticket record is updated in the database to reference the new category.
+2. If the new category has a different Discord parent category, channel name template, or staff roles, the channel is edited in one API call to apply all three changes simultaneously.
+3. Permission overwrites are rebuilt: `@everyone` is denied `ViewChannel`; the bot, the ticket creator, and all staff roles of the new category are granted access.
+4. A message is posted in the channel: *"@You has moved this ticket from **OldCategory** to **NewCategory**."*
+
+<Warning>
+  If the destination Discord category channel already contains 50 channels
+  (Discord's maximum), the move will fail and you will receive an error.
+</Warning>
+
+<Note>
+  The command uses the current channel as the ticket to move. You cannot move a
+  ticket from a different channel.
+</Note>

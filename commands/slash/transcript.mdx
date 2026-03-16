@@ -1,0 +1,54 @@
+---
+title: "/transcript"
+description: "Download the transcript of a closed ticket as a file attachment."
+---
+
+The `/transcript` command generates and sends a transcript file for a specified ticket. The file format is determined by the template configured on your server (e.g. HTML or plain text).
+
+## Who can use it
+
+- **Ticket creator** — can always download the transcript of their own ticket.
+- **Staff members with the ticket's category role** — can download transcripts for tickets in their categories.
+- **Members with Manage Server permission** — can download transcripts for any ticket.
+- **Configured super-users** — can download transcripts for any ticket.
+
+Anyone else receives an access-denied error.
+
+## Options
+
+<ParamField query="ticket" type="string" required>
+  The ticket to get the transcript of. Accepts a ticket channel ID or ticket
+  number (short numeric ID). Supports autocomplete.
+</ParamField>
+
+<ParamField query="member" type="user" optional>
+  The member to search for tickets of. Used to filter the autocomplete results
+  for the `ticket` option.
+</ParamField>
+
+## Example usage
+
+```
+/transcript ticket:42
+```
+
+```
+/transcript ticket:abc123def456 member:@Eve
+```
+
+## What happens after you run it
+
+1. The bot fetches the full ticket record including all archived messages, users, roles, and Q&A answers.
+2. It renders the transcript using the server's configured Mustache template.
+3. The generated file is sent as an attachment in an ephemeral reply, visible only to you.
+
+<Note>
+  Transcripts are only available when archiving is enabled on the server. If
+  archiving is disabled, the `/transcript` command will not return meaningful
+  message history.
+</Note>
+
+<Tip>
+  You can use a short ticket number (e.g. `42`) instead of the full channel ID
+  when running the command from within the same server.
+</Tip>

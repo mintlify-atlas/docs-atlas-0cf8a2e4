@@ -1,0 +1,98 @@
+---
+title: "Features"
+description: "A full overview of everything Discord Tickets can do."
+---
+
+## Ticket management
+
+<CardGroup cols={2}>
+  <Card title="Slash commands" icon="slash">
+    All ticket actions are available as slash commands, including `/new`, `/close`, `/add`, `/remove`, `/claim`, `/release`, `/move`, `/transfer`, `/rename`, `/topic`, `/transcript`, `/tickets`, `/priority`, `/tag`, and `/force-close`.
+  </Card>
+  <Card title="Buttons and select menus" icon="hand-pointer">
+    Members open tickets through interactive buttons and select menus. No commands required from the member side.
+  </Card>
+  <Card title="Context and questions" icon="circle-question">
+    Ask members to select a topic or answer up to 5 custom questions before a ticket is created. Answers are shown at the top of the ticket channel.
+  </Card>
+  <Card title="Organisation" icon="folder-tree">
+    Staff can claim, release, move, and transfer tickets between members and categories to keep the queue organised.
+  </Card>
+</CardGroup>
+
+## Automation
+
+<CardGroup cols={2}>
+  <Card title="Tags" icon="tag">
+    Create tags with trigger keywords or regex patterns. The bot automatically responds to messages that match, resolving common questions without escalating to tickets.
+  </Card>
+  <Card title="Auto-close" icon="clock">
+    Inactive tickets are closed automatically after a configurable period of inactivity, reducing clutter in your staff channels.
+  </Card>
+  <Card title="Stale ticket warnings" icon="triangle-exclamation">
+    Members receive a warning before their inactive ticket is closed, giving them a chance to respond.
+  </Card>
+</CardGroup>
+
+## Archiving and transcripts
+
+All messages in a ticket are stored in the database. When a ticket is closed, a transcript is generated and can be viewed later through the web dashboard. The archive is fully searchable and linked to the member's history.
+
+## Dashboard
+
+Discord Tickets includes a built-in web dashboard (served by the bot process itself) for:
+
+- Configuring guild settings
+- Managing ticket categories
+- Viewing and searching ticket transcripts
+- Reviewing staff statistics
+
+The dashboard runs on the same host and port as the bot's HTTP server. No separate deployment is needed.
+
+## Statistics
+
+Track your support team's performance with built-in statistics:
+
+- First response time per staff member
+- Average resolution time
+- Ticket volume over time
+- Star ratings left by members
+
+## Internationalisation
+
+Discord Tickets is available in more than 10 languages. Translations are community-maintained on [Weblate](https://hosted.weblate.org/engage/discord-tickets/). The bot detects each user's Discord locale and responds in the appropriate language where a translation is available.
+
+Currently supported languages include English, French, Russian, Dutch, Chinese (Simplified), and more.
+
+## Security
+
+All sensitive values stored in the database (such as OAuth tokens) are encrypted using the `ENCRYPTION_KEY` you provide. The key must be at least 48 characters. If the key is lost, encrypted data becomes unreadable — keep it safe.
+
+## Commands reference
+
+<AccordionGroup>
+  <Accordion title="Ticket actions">
+    | Command | Description |
+    |---|---|
+    | `/new` | Open a new ticket |
+    | `/close` | Close a ticket |
+    | `/force-close` | Force-close a ticket (staff only) |
+    | `/add` | Add a member to a ticket |
+    | `/remove` | Remove a member from a ticket |
+    | `/claim` | Claim a ticket |
+    | `/release` | Release a claimed ticket |
+    | `/move` | Move a ticket to another category |
+    | `/transfer` | Transfer ownership of a ticket |
+    | `/rename` | Rename a ticket channel |
+    | `/topic` | Change the ticket topic |
+    | `/priority` | Set ticket priority |
+    | `/transcript` | Get a link to the ticket transcript |
+    | `/tickets` | View your open tickets |
+    | `/tag` | Send a tag response |
+    | `/help` | Show help information |
+  </Accordion>
+</AccordionGroup>
+
+## Docker support
+
+Official Docker images are published as `eartharoid/discord-tickets:4.0`. The image is built on Node.js 22 Alpine and supports MySQL, PostgreSQL, and SQLite.

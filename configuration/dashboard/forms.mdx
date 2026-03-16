@@ -1,0 +1,108 @@
+---
+title: "Configuring forms"
+description: "Add questions to ticket categories to collect structured information from users when they open a ticket."
+---
+
+Forms let you collect structured information from users before a ticket channel is created. When a category has questions, users see a Discord modal dialog with up to five fields when they click the create button. Their answers are stored with the ticket and displayed in the opening message.
+
+## How forms work
+
+Forms are attached to individual categories. Each form is made up of one or more questions. When a user creates a ticket in a category that has questions, Discord presents a modal with the form fields. The user fills in the answers before the ticket channel is created.
+
+<Note>
+Discord modals support a maximum of five questions per form. If you need more information, consider splitting into multiple categories or using the `requireTopic` setting for a freeform topic field.
+</Note>
+
+## Adding questions to a category
+
+<Steps>
+  <Step title="Open the category">
+    In the dashboard, go to **Categories** and click the category you want to add questions to.
+  </Step>
+  <Step title="Scroll to the Questions section">
+    The questions editor is at the bottom of the category settings page.
+  </Step>
+  <Step title="Add a question">
+    Click **Add question** to add a new field to the form.
+  </Step>
+  <Step title="Configure the question">
+    Set the label, type, placeholder, and any other relevant options.
+  </Step>
+  <Step title="Save the category">
+    Click **Save** to apply the changes. The form takes effect for all new tickets immediately.
+  </Step>
+</Steps>
+
+## Question fields
+
+<ParamField path="label" type="string" required>
+  The question label shown above the input field in the Discord modal. Maximum 45 characters.
+
+  Example: `Describe the issue`
+</ParamField>
+
+<ParamField path="type" type="string" required>
+  The type of input field. One of:
+
+  - `TEXT` — A text input field (short or long).
+  - `MENU` — A select menu (dropdown) with predefined options.
+</ParamField>
+
+<ParamField path="style" type="integer">
+  Controls the height of a `TEXT` input. Uses Discord's component style integers:
+
+  - `1` — Short (single-line input)
+  - `2` — Paragraph (multi-line input, default)
+</ParamField>
+
+<ParamField path="placeholder" type="string">
+  Placeholder text shown inside the input when it is empty. Maximum 100 characters.
+
+  Example: `Please describe the problem in as much detail as possible.`
+</ParamField>
+
+<ParamField path="value" type="string">
+  Pre-filled default value placed in the input field when the modal opens. Users can edit or clear it.
+</ParamField>
+
+<ParamField path="required" type="boolean">
+  Whether the user must fill in this field before submitting. Defaults to `true`.
+</ParamField>
+
+<ParamField path="minLength" type="integer">
+  Minimum number of characters required in a `TEXT` field. Defaults to `0`.
+</ParamField>
+
+<ParamField path="maxLength" type="integer">
+  Maximum number of characters allowed in a `TEXT` field. Defaults to `4000`.
+</ParamField>
+
+<ParamField path="options" type="array">
+  List of options for a `MENU` type question. Each option is presented as a choice in the select dropdown.
+</ParamField>
+
+<ParamField path="order" type="integer" required>
+  The display order of the question within the form. Questions are shown in ascending order. The first question has order `0`.
+</ParamField>
+
+## Example form
+
+Here is an example configuration for a bug report category form with three questions:
+
+| Order | Label                  | Type   | Required | Notes                                 |
+|-------|------------------------|--------|----------|---------------------------------------|
+| 0     | Summary                | TEXT   | Yes      | Style 1 (short), max 100 chars        |
+| 1     | Steps to reproduce     | TEXT   | Yes      | Style 2 (paragraph), max 4000 chars   |
+| 2     | Discord version        | MENU   | No       | Options: Desktop, Mobile, Web         |
+
+## Viewing answers
+
+Answers are saved as `QuestionAnswer` records in the database and are displayed in the ticket's opening message embed. Staff can see each question and the user's response directly in the ticket channel.
+
+## Deleting questions
+
+You can delete individual questions from a category using the delete button on each question row. Deleting a question removes it from future ticket forms but does not remove historical answers from existing tickets.
+
+<Warning>
+Deleting a question is permanent and cannot be undone. Existing answers for that question in old tickets are also removed from the database due to the cascade delete relationship.
+</Warning>

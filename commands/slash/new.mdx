@@ -1,0 +1,44 @@
+---
+title: "/new"
+description: "Create a new ticket in the current server."
+---
+
+The `/new` command opens a new support ticket. When you run it, the bot presents a category selector (or skips straight to ticket creation if only one category is configured). After selecting a category, you may be prompted to answer questions before the ticket channel is created.
+
+## Who can use it
+
+All server members can use `/new`, unless they have been blocked by an administrator.
+
+## Options
+
+<ParamField query="references" type="string" optional>
+  The number of a related ticket. Use this to link the new ticket to a previous
+  one — useful when following up on a resolved issue. Supports autocomplete.
+</ParamField>
+
+## Example usage
+
+```
+/new
+```
+
+```
+/new references:42
+```
+
+## What happens after you run it
+
+1. A category selection menu appears (if more than one category exists).
+2. You answer any configured questions in a modal.
+3. The bot creates a private channel and posts a confirmation message with the channel link.
+
+<Note>
+  If you already have an open ticket in the selected category and the category
+  enforces a per-member limit, the bot will remind you to close your existing
+  ticket first.
+</Note>
+
+<Tip>
+  If you are following up on a previous ticket, pass its number to `references`
+  so staff can quickly see the history.
+</Tip>

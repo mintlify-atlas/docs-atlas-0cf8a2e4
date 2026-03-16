@@ -1,0 +1,109 @@
+---
+title: "Updating"
+description: "How to update Discord Tickets to a newer version."
+---
+
+Discord Tickets uses [Prisma](https://www.prisma.io/) to manage database migrations. New versions may include schema migrations that run automatically on startup, so always back up your database before updating.
+
+<Warning>
+  Read the [CHANGELOG](https://github.com/discord-tickets/bot/blob/main/CHANGELOG.md) before updating. Some releases include breaking changes that require manual action.
+</Warning>
+
+## Docker
+
+<Steps>
+  <Step title="Back up your database">
+    Before updating, dump your MySQL or PostgreSQL database:
+
+    ```bash
+    docker compose exec mysql mysqldump -u tickets -p tickets > backup.sql
+    ```
+
+    For SQLite, copy the volume or the file directly:
+
+    ```bash
+    docker compose cp bot:/home/container/user/database.db ./database.db.bak
+    ```
+  </Step>
+
+  <Step title="Pull the new image">
+    ```bash
+    docker compose pull
+    ```
+  </Step>
+
+  <Step title="Recreate the container">
+    ```bash
+    docker compose up -d
+    ```
+
+    Docker Compose recreates any containers whose image has changed. The `postinstall` script runs inside the new container on startup and applies any pending database migrations automatically.
+  </Step>
+
+  <Step title="Check the logs">
+    ```bash
+    docker compose logs -f bot
+    ```
+
+    Confirm the bot starts without errors and reports the new version.
+  </Step>
+</Steps>
+
+## Manual (Node.js)
+
+<Steps>
+  <Step title="Back up your database">
+    For SQLite:
+
+    ```bash
+    cp ./user/database.db ./user/database.db.bak
+    ```
+
+    For MySQL or PostgreSQL, use your database's native dump tool.
+  </Step>
+
+  <Step title="Pull the latest code">
+    ```bash
+    git pull
+    ```
+  </Step>
+
+  <Step title="Install updated dependencies and run migrations">
+    ```bash
+    npm install
+    ```
+
+    The `postinstall` script runs automatically and applies any new database migrations.
+  </Step>
+
+  <Step title="Restart the bot">
+    Restart whichever process manager you use:
+
+    <Tabs>
+      <Tab title="PM2">
+        ```bash
+        pm2 restart discord-tickets
+        ```
+      </Tab>
+      <Tab title="systemd">
+        ```bash
+        sudo systemctl restart discord-tickets
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+</Steps>
+
+## Database utilities
+
+The project includes a set of database scripts for advanced maintenance:
+
+| Script | Command | Description |
+|---|---|---|
+| Dump | `npm run db.dump` | Export the database to a JSON file. |
+| Restore | `npm run db.restore` | Restore from a JSON dump. |
+| Prune | `npm run db.prune` | Remove old or orphaned records. |
+
+<Note>
+  These scripts read the same environment variables as the bot. Make sure your `.env` is loaded before running them.
+</Note>

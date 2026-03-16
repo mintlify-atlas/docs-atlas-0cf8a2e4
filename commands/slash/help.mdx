@@ -1,0 +1,37 @@
+---
+title: "/help"
+description: "Show the help menu with a list of available commands."
+---
+
+The `/help` command displays an overview of all available slash commands registered by the bot. Staff members also see useful links and a direct link to the bot's settings portal.
+
+## Who can use it
+
+All server members can use `/help`.
+
+## Options
+
+This command has no options.
+
+## Example usage
+
+```
+/help
+```
+
+## What happens after you run it
+
+You receive an ephemeral embed containing:
+
+- **Commands** — a list of every slash command the bot has registered, shown as clickable Discord command mentions (e.g. `/new`, `/close`), each with its description.
+
+If you are a staff member, the embed also includes:
+
+- **Useful links** — quick links to the full command list, documentation, feedback form, and support server.
+- **Bot settings** — a direct URL to the bot's web settings portal for your server.
+
+For non-staff members, the description prompts you to use `/new` to open a ticket.
+
+<Note>
+  The response is ephemeral — only you can see it.
+</Note>

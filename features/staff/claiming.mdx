@@ -1,0 +1,85 @@
+---
+title: "Claiming tickets"
+description: "How staff members can claim exclusive ownership of a ticket and release it back to the team."
+---
+
+Claiming lets a staff member take personal responsibility for a ticket. When a ticket is claimed, the other staff roles lose visibility of the channel — only the claiming staff member and the ticket creator can see it.
+
+## Claiming a ticket
+
+A ticket can be claimed in two ways:
+
+- The **Claim** button on the ticket's opening message (shown when `claimButton` is enabled and the category has `claiming` enabled).
+- The `/claim` slash command, run inside the ticket channel.
+
+```
+/claim
+```
+
+Both routes call the same logic. Only staff members (users with a configured staff role) can claim a ticket.
+
+### What happens when a ticket is claimed
+
+<Steps>
+  <Step title="Channel permissions updated">
+    The claiming staff member's user ID is given an explicit `ViewChannel: true` override on the channel. Every staff role configured for the category is given a `ViewChannel: false` override, hiding the channel from other staff members.
+  </Step>
+  <Step title="Database updated">
+    The ticket record is updated with `claimedBy` set to the staff member's user ID.
+  </Step>
+  <Step title="Opening message updated">
+    The **Claim** button on the opening message is replaced with an **Unclaim** button. The Close button is preserved.
+  </Step>
+  <Step title="Confirmation posted">
+    An embed is posted in the channel noting who claimed the ticket.
+  </Step>
+  <Step title="Event logged">
+    A `claim` event is written to the guild's log channel.
+  </Step>
+</Steps>
+
+## Releasing a ticket
+
+A claimed ticket can be released so the whole team regains access:
+
+- The **Unclaim** button on the opening message.
+- The `/release` slash command, run inside the ticket channel.
+
+```
+/release
+```
+
+### What happens when a ticket is released
+
+<Steps>
+  <Step title="Channel permissions restored">
+    The claimer's personal permission overwrite is deleted. All staff roles for the category are restored to `ViewChannel: true`.
+  </Step>
+  <Step title="Database updated">
+    The `claimedBy` relation is disconnected.
+  </Step>
+  <Step title="Opening message updated">
+    The **Unclaim** button is replaced with the **Claim** button again.
+  </Step>
+  <Step title="Confirmation posted">
+    An embed confirms the ticket has been released.
+  </Step>
+  <Step title="Event logged">
+    An `unclaim` event is written to the guild's log channel.
+  </Step>
+</Steps>
+
+## Configuration
+
+Claiming must be enabled in two places:
+
+| Setting | Location | Description |
+|---|---|---|
+| `claiming` | Per category (Settings panel) | Enables the claim/unclaim buttons and `/claim` for that category. |
+| `claimButton` | Per guild (Settings panel) | Controls whether the claim/unclaim button is shown on the opening message. |
+
+Both must be enabled for the Claim button to appear. The `/claim` and `/release` commands are always available to staff regardless of the button setting.
+
+<Tip>
+Claiming is useful in high-volume servers to prevent multiple staff members from responding to the same ticket simultaneously.
+</Tip>

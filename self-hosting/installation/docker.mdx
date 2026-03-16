@@ -1,0 +1,166 @@
+---
+title: "Docker installation"
+description: "Deploy Discord Tickets using Docker Compose with MySQL."
+---
+
+The official Docker image is `eartharoid/discord-tickets:4.0`. The Docker Compose file in the repository starts both the bot and a MySQL 8 database together.
+
+## Prerequisites
+
+- Docker Engine and Docker Compose v2 installed
+- A Discord bot token and OAuth2 client secret — see [Create a bot](/getting-started/create-bot)
+- A server with an open port for the dashboard (default: `8169`)
+
+## Steps
+
+<Steps>
+  <Step title="Download the Docker Compose file">
+    Download the `docker-compose.yml` from the repository:
+
+    ```bash
+    curl -O https://raw.githubusercontent.com/discord-tickets/bot/main/docker-compose.yml
+    ```
+
+    Or copy the contents manually into a new file on your server.
+  </Step>
+
+  <Step title="Edit the Compose file">
+    Open `docker-compose.yml` and make the following changes:
+
+    1. Change both `insecure` MySQL passwords to something secure:
+
+    ```yaml
+    environment:
+      MYSQL_PASSWORD: your_secure_password
+      MYSQL_ROOT_PASSWORD: your_other_secure_password
+    ```
+
+    2. Update `DB_CONNECTION_URL` under the `bot` service to use the same password:
+
+    ```yaml
+    DB_CONNECTION_URL: mysql://tickets:your_secure_password@mysql/tickets
+    ```
+
+    3. Set `HTTP_EXTERNAL` to the public URL of your server (no trailing slash):
+
+    ```yaml
+    HTTP_EXTERNAL: https://tickets.example.com
+    ```
+
+    4. Fill in the required bot environment variables:
+
+    ```yaml
+    DISCORD_SECRET: your_oauth2_client_secret
+    DISCORD_TOKEN: your_bot_token
+    ENCRYPTION_KEY: # leave blank on first run; auto-generated
+    ```
+
+    5. Set the `SUPER` variable to your Discord user ID (right-click your name in Discord with developer mode enabled and copy the ID):
+
+    ```yaml
+    SUPER: 123456789012345678
+    ```
+
+    <Warning>
+      Read the [configuration reference](/self-hosting/configuration) before deploying. Leaving the default passwords in place is a security vulnerability.
+    </Warning>
+  </Step>
+
+  <Step title="Generate an encryption key">
+    The `ENCRYPTION_KEY` must be at least 48 characters. Generate one before starting the containers:
+
+    ```bash
+    docker run --rm eartharoid/discord-tickets:4.0 node /app/scripts/keygen
+    ```
+
+    Copy the output and paste it as the value of `ENCRYPTION_KEY` in your Compose file.
+
+    <Warning>
+      Keep the encryption key safe. If you lose it, encrypted data in the database (such as OAuth tokens) becomes unreadable.
+    </Warning>
+  </Step>
+
+  <Step title="Start the containers">
+    ```bash
+    docker compose up -d
+    ```
+
+    The first start may take a minute while the database is initialised and migrations run.
+  </Step>
+
+  <Step title="Check the logs">
+    Confirm the bot connected to Discord:
+
+    ```bash
+    docker compose logs -f bot
+    ```
+
+    You should see the bot log in and print its version banner. Press `Ctrl+C` to stop following logs.
+  </Step>
+</Steps>
+
+## Docker Compose reference
+
+The full default `docker-compose.yml`:
+
+```yaml docker-compose.yml
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8
+    restart: unless-stopped
+    hostname: mysql
+    networks:
+      - discord-tickets
+    volumes:
+      - tickets-mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: tickets
+      MYSQL_PASSWORD: insecure # change this
+      MYSQL_ROOT_PASSWORD: insecure # change this
+      MYSQL_USER: tickets
+
+  bot:
+    image: eartharoid/discord-tickets:4.0
+    depends_on:
+      - mysql
+    restart: unless-stopped
+    hostname: bot
+    networks:
+      - discord-tickets
+    ports:
+      - 8169:8169
+    volumes:
+      - tickets-bot:/home/container/user
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    tty: true
+    stdin_open: true
+    environment:
+      DB_CONNECTION_URL: mysql://tickets:insecure@mysql/tickets
+      DISCORD_SECRET:
+      DISCORD_TOKEN:
+      ENCRYPTION_KEY:
+      DB_PROVIDER: mysql
+      HTTP_EXTERNAL: http://127.0.0.1:8169
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 8169
+      HTTP_TRUST_PROXY: "false"
+      SUPER: 319467558166069248
+
+networks:
+  discord-tickets:
+
+volumes:
+  tickets-mysql:
+  tickets-bot:
+```
+
+## Reverse proxy
+
+If you put the bot behind a reverse proxy (nginx, Caddy, Traefik, etc.), set `HTTP_TRUST_PROXY` to `true` in the bot's environment. Set `HTTP_EXTERNAL` to the public HTTPS URL your proxy serves.
+
+## Updating
+
+See the [updating guide](/self-hosting/updating) for how to pull new image versions without losing data.

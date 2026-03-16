@@ -1,0 +1,56 @@
+---
+title: "Moving tickets"
+description: "Transfer a ticket from one category to another using the /move command."
+---
+
+The `/move` command lets staff reassign a ticket to a different category. This updates the ticket's Discord channel parent, permission overwrites, channel name, and database record in a single operation.
+
+## Usage
+
+```
+/move category: <category>
+```
+
+The `category` parameter is required and autocompletes from all categories configured for the guild.
+
+<Note>
+`/move` can only be used inside a ticket channel and is restricted to staff members.
+</Note>
+
+## What changes when you move a ticket
+
+<Steps>
+  <Step title="Database updated">
+    The ticket's `categoryId` is updated to the new category. The in-memory open-ticket counters are adjusted: the old category's total and member count are decremented; the new category's counts are incremented.
+  </Step>
+  <Step title="Channel edited">
+    If the new category differs from the old one in any of `staffRoles`, `channelName`, or `discordCategory`, the channel is edited in a single API call:
+    - The channel is moved to the new Discord category (parent).
+    - The channel name is re-rendered from the new category's `channelName` template (preserving the ticket number).
+    - Permission overwrites are rewritten: `@everyone` is denied `ViewChannel`, the bot and the ticket creator retain access, and the new category's staff roles are granted access.
+    - If the ticket has a priority set, the priority emoji prefix is preserved in the new name.
+  </Step>
+  <Step title="Confirmation posted">
+    An embed is posted in the channel showing who moved the ticket, the source category name, and the destination category name.
+  </Step>
+</Steps>
+
+## Capacity check
+
+Before moving, the bot checks that the destination Discord category does not already contain 50 channels (Discord's maximum). If it is full, the command fails with a "category full" error.
+
+## Permission requirements
+
+| Condition | Result |
+|---|---|
+| User is not staff | Command fails with a "not staff" error |
+| Run outside a ticket channel | Command fails with a "not a ticket" error |
+| Destination Discord category is full | Command fails with a "category full" error |
+
+## Effect on claiming
+
+Moving a ticket does not affect its claimed status. If the ticket was claimed before moving, the claimer retains their explicit `ViewChannel: true` override because the permission rewrite in the move operation includes the ticket creator but does not explicitly remove existing individual user overwrites beyond what is set.
+
+<Warning>
+If the destination category has different staff roles, the old staff role overwrites are replaced. Staff members who had access via the old category's roles will lose access once the ticket is moved unless they are also in the new category's staff roles.
+</Warning>

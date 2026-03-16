@@ -1,0 +1,143 @@
+---
+title: "Users"
+description: "API endpoints for the authenticated user's profile and service API key generation."
+---
+
+## Get the current user
+
+`GET /api/users/@me`
+
+Returns the authenticated user's profile. This is the decoded JWT payload — the data comes from Discord's OAuth2 flow and is cached in the session token.
+
+**Authentication:** required (`authenticate`)
+
+### Response
+
+<ResponseField name="id" type="string">Discord user ID (snowflake).</ResponseField>
+<ResponseField name="username" type="string">Discord username.</ResponseField>
+<ResponseField name="avatar" type="string">Discord avatar hash, or `null`.</ResponseField>
+<ResponseField name="locale" type="string">User's Discord locale code (e.g. `en-US`, `fr`).</ResponseField>
+<ResponseField name="accessToken" type="string">Discord OAuth2 access token for the current session.</ResponseField>
+<ResponseField name="expiresAt" type="number">Unix timestamp in milliseconds when the Discord access token expires.</ResponseField>
+<ResponseField name="scopes" type="string[]">Array of OAuth2 scopes granted for this session (e.g. `["identify", "guilds"]`).</ResponseField>
+
+### Example response
+
+```json
+{
+  "id": "123456789012345678",
+  "username": "example",
+  "avatar": "a_1234abcd5678ef90",
+  "locale": "en-US",
+  "accessToken": "<discord-oauth2-token>",
+  "expiresAt": 1720000000000,
+  "scopes": ["identify", "guilds"]
+}
+```
+
+---
+
+## Generate an API key
+
+`GET /api/users/@me/key`
+
+Generates a long-lived JWT service token for the authenticated user. Use this token to authenticate programmatic API requests from server-side code without going through the browser OAuth2 flow.
+
+**Authentication:** required (`authenticate`)
+
+<Warning>
+API keys are not available when the bot is configured as a public bot (`PUBLIC_BOT=true`). Calling this endpoint on a public bot returns `400 Bad Request`.
+</Warning>
+
+### Response
+
+<ResponseField name="token" type="string">
+  A signed JWT containing the user's `id`, a `createdAt` timestamp, and `service: true`. This token does not carry an `expiresAt` field and is not tied to a Discord session expiry.
+</ResponseField>
+
+### Example response
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Error response (public bot)
+
+```json
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "API keys are not available on public bots."
+}
+```
+
+### Using the API key
+
+Pass the token in the `token` cookie on subsequent requests:
+
+```bash
+curl https://tickets.example.com/api/users/@me \
+  -H "Cookie: token=<your-api-key>"
+```
+
+<Note>
+Service tokens are invalidated if the `INVALIDATE_TOKENS` environment variable is updated on the server, the same as session tokens.
+</Note>
+
+---
+
+## Get client stats
+
+`GET /api/client`
+
+Returns public bot statistics. No authentication required. Responses are cached for 15 minutes.
+
+### Response
+
+<ResponseField name="id" type="string">Bot's Discord user ID.</ResponseField>
+<ResponseField name="username" type="string">Bot's username.</ResponseField>
+<ResponseField name="discriminator" type="string">Bot's discriminator.</ResponseField>
+<ResponseField name="avatar" type="string">Bot's avatar URL.</ResponseField>
+<ResponseField name="version" type="string">Bot version string.</ResponseField>
+<ResponseField name="public" type="boolean">Whether the bot is running in public mode.</ResponseField>
+<ResponseField name="stats" type="object">
+  <Expandable title="Stats">
+    <ResponseField name="guilds" type="number">Number of guilds the bot is in.</ResponseField>
+    <ResponseField name="members" type="number">Total member count across all guilds.</ResponseField>
+    <ResponseField name="tickets" type="number">Total tickets ever created.</ResponseField>
+    <ResponseField name="categories" type="number">Total categories across all guilds.</ResponseField>
+    <ResponseField name="tags" type="number">Total tags across all guilds.</ResponseField>
+    <ResponseField name="activatedUsers" type="number">Number of users who have sent at least one message in a ticket.</ResponseField>
+    <ResponseField name="archivedMessages" type="number">Total archived messages.</ResponseField>
+    <ResponseField name="avgRating" type="string">Global average feedback rating, formatted to one decimal place.</ResponseField>
+    <ResponseField name="avgResponseTime" type="string">Global average first-response time (e.g. `"2h"`).</ResponseField>
+    <ResponseField name="avgResolutionTime" type="string">Global average ticket resolution time.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Example response
+
+```json
+{
+  "id": "987654321098765432",
+  "username": "Tickets",
+  "discriminator": "0",
+  "avatar": "https://cdn.discordapp.com/avatars/...",
+  "version": "4.0.50",
+  "public": false,
+  "stats": {
+    "guilds": 12,
+    "members": 5430,
+    "tickets": 1892,
+    "categories": 24,
+    "tags": 47,
+    "activatedUsers": 312,
+    "archivedMessages": 18234,
+    "avgRating": "4.7",
+    "avgResponseTime": "3m",
+    "avgResolutionTime": "1h"
+  }
+}
+```
