@@ -1,0 +1,190 @@
+{
+  "projectType": "saas",
+  "projectName": "Discord Tickets",
+  "projectDescription": "The most popular open-source, self-hosted ticket management bot for Discord, offering a free alternative to premium ticketing solutions.",
+  "theme": "mint",
+  "primaryColor": "#606cf5",
+  "lightColor": "#acb4fb",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Getting Started",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "introduction",
+              "features"
+            ]
+          },
+          {
+            "group": "Self-Hosting",
+            "pages": [
+              "self-hosting/installation/overview",
+              "self-hosting/installation/docker",
+              "self-hosting/installation/manual",
+              "self-hosting/configuration",
+              "self-hosting/updating"
+            ]
+          },
+          {
+            "group": "Quick Setup",
+            "pages": [
+              "getting-started/create-bot",
+              "getting-started/first-category",
+              "getting-started/invite"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Configuration",
+        "groups": [
+          {
+            "group": "Environment Variables",
+            "pages": [
+              "configuration/environment-variables",
+              "configuration/database",
+              "configuration/security"
+            ]
+          },
+          {
+            "group": "Dashboard",
+            "pages": [
+              "configuration/dashboard/overview",
+              "configuration/dashboard/categories",
+              "configuration/dashboard/tags",
+              "configuration/dashboard/forms"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Features",
+        "groups": [
+          {
+            "group": "Tickets",
+            "pages": [
+              "features/tickets/overview",
+              "features/tickets/creating",
+              "features/tickets/managing",
+              "features/tickets/closing",
+              "features/tickets/transcripts"
+            ]
+          },
+          {
+            "group": "Automation",
+            "pages": [
+              "features/automation/tags",
+              "features/automation/auto-close",
+              "features/automation/feedback"
+            ]
+          },
+          {
+            "group": "Staff Tools",
+            "pages": [
+              "features/staff/claiming",
+              "features/staff/moving",
+              "features/staff/statistics"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Commands",
+        "groups": [
+          {
+            "group": "Slash Commands",
+            "pages": [
+              "commands/slash/new",
+              "commands/slash/close",
+              "commands/slash/add",
+              "commands/slash/remove",
+              "commands/slash/claim",
+              "commands/slash/release",
+              "commands/slash/move",
+              "commands/slash/transfer",
+              "commands/slash/rename",
+              "commands/slash/tag",
+              "commands/slash/tickets",
+              "commands/slash/transcript",
+              "commands/slash/topic",
+              "commands/slash/priority",
+              "commands/slash/force-close",
+              "commands/slash/help"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "API",
+            "pages": [
+              "reference/api/overview",
+              "reference/api/authentication",
+              "reference/api/guilds",
+              "reference/api/tickets",
+              "reference/api/users"
+            ]
+          },
+          {
+            "group": "Internationalisation",
+            "pages": [
+              "reference/i18n/overview",
+              "reference/i18n/contributing"
+            ]
+          },
+          {
+            "group": "Troubleshooting",
+            "pages": [
+              "reference/troubleshooting",
+              "reference/faq",
+              "reference/changelog"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Slash commands, buttons, select menus, and modals for modern Discord interactions",
+    "Multiple database support: MySQL, PostgreSQL, and SQLite",
+    "Ticket archiving and HTML transcript generation",
+    "Customisable categories with question forms (up to 5 questions per ticket)",
+    "Tags system to resolve member issues without creating tickets",
+    "Auto-close inactive tickets with configurable timeouts",
+    "Staff tools: claim, release, move, transfer, and rename tickets",
+    "Feedback and rating system with staff performance statistics",
+    "Built-in dashboard for configuration via web UI",
+    "Docker support for quick and reliable deployment",
+    "Internationalisation with 10+ supported languages",
+    "Ticket references to link related tickets or messages"
+  ],
+  "publicApiSurface": [
+    "GET /api/guilds - List guilds",
+    "GET /api/guilds/:guild - Get guild details",
+    "GET /api/guilds/:guild/tickets - List tickets for a guild",
+    "GET /api/users/:user - Get user details",
+    "GET /api/locales - Get available locales",
+    "GET /api/client - Get bot client info",
+    "/new - Create a new ticket",
+    "/close - Close a ticket",
+    "/add - Add a member to a ticket",
+    "/remove - Remove a member from a ticket",
+    "/claim - Claim a ticket as staff",
+    "/release - Release a claimed ticket",
+    "/move - Move a ticket to another category",
+    "/transfer - Transfer ticket ownership",
+    "/rename - Rename a ticket channel",
+    "/tag - Send a tag response",
+    "/tickets - List your tickets",
+    "/transcript - Generate ticket transcript",
+    "/topic - Change ticket topic",
+    "/priority - Set ticket priority",
+    "/force-close - Force close a ticket",
+    "/help - Show help information"
+  ]
+}
